@@ -24,38 +24,38 @@ export default function Dashboard() {
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex bg-white">
-        <div className="w-64 bg-black text-white flex flex-col">
+        <div className="w-64 bg-white text-black flex flex-col border-r border-gray-200">
           <div className="p-6">
             <h2 className="text-2xl font-bold">Admin Panel</h2>
           </div>
           <nav className="flex-1 px-4 py-6">
             <ul className="space-y-2">
               <li>
-                <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md">
+                <a href="#" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md">
                   <Home className="h-5 w-5 mr-3" />
                   Dashboard
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md">
+                <a href="#" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md">
                   <User className="h-5 w-5 mr-3" />
                   Profile
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md">
+                <a href="#" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md">
                   <BarChart3 className="h-5 w-5 mr-3" />
                   Analytics
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md">
+                <a href="#" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md">
                   <Users className="h-5 w-5 mr-3" />
                   Users
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md">
+                <a href="#" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md">
                   <Settings className="h-5 w-5 mr-3" />
                   Settings
                 </a>
@@ -63,7 +63,7 @@ export default function Dashboard() {
             </ul>
           </nav>
           <div className="px-4 py-6">
-            <button className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md w-full">
+            <button className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md w-full">
               <LogOut className="h-5 w-5 mr-3" />
               Logout
             </button>
@@ -89,38 +89,38 @@ export default function Dashboard() {
     return (
       <div className="min-h-screen flex bg-white">
           {/* Sidebar */}
-          <div className="w-64 bg-black text-white flex flex-col">
+          <div className="w-64 bg-white text-black flex flex-col border-r border-gray-200">
           <div className="p-6">
             <h2 className="text-2xl font-bold">Admin Panel</h2>
           </div>
           <nav className="flex-1 px-4 py-6">
             <ul className="space-y-2">
               <li>
-                <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md">
+                <a href="#" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md">
                   <Home className="h-5 w-5 mr-3" />
                   Dashboard
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md">
+                <a href="#" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md">
                   <User className="h-5 w-5 mr-3" />
                   Profile
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md">
+                <a href="#" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md">
                   <BarChart3 className="h-5 w-5 mr-3" />
                   Analytics
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md">
+                <a href="#" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md">
                   <Users className="h-5 w-5 mr-3" />
                   Users
                 </a>
               </li>
               <li>
-                <a href="#" className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md">
+                <a href="#" className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md">
                   <Settings className="h-5 w-5 mr-3" />
                   Settings
                 </a>
@@ -128,7 +128,7 @@ export default function Dashboard() {
             </ul>
           </nav>
           <div className="px-4 py-6">
-            <button className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md w-full">
+            <button className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md w-full">
               <LogOut className="h-5 w-5 mr-3" />
               Logout
             </button>
@@ -255,7 +255,7 @@ export default function Dashboard() {
         <Header />
         <main className="flex-1 flex">
           {/* Sidebar */}
-          <div className="w-64 bg-gray-800 text-white flex flex-col">
+          <div className="w-64 bg-white text-black flex flex-col border-r border-gray-200">
             <div className="p-6">
               <h2 className="text-2xl font-bold">Dashboard</h2>
             </div>
@@ -266,8 +266,8 @@ export default function Dashboard() {
                     onClick={() => setActiveSection('profile')}
                     className={`w-full flex items-center px-4 py-2 text-left rounded-md ${
                       activeSection === 'profile'
-                        ? 'bg-white text-black'
-                        : 'text-gray-300 hover:bg-white hover:text-black'
+                        ? 'bg-gray-100 text-black'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-black'
                     }`}
                   >
                     <User className="h-5 w-5 mr-3" />
@@ -279,8 +279,8 @@ export default function Dashboard() {
                     onClick={() => setActiveSection('quick-actions')}
                     className={`w-full flex items-center px-4 py-2 text-left rounded-md ${
                       activeSection === 'quick-actions'
-                        ? 'bg-white text-black'
-                        : 'text-gray-300 hover:bg-white hover:text-black'
+                        ? 'bg-gray-100 text-black'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-black'
                     }`}
                   >
                     <Settings className="h-5 w-5 mr-3" />
@@ -292,8 +292,8 @@ export default function Dashboard() {
                     onClick={() => setActiveSection('recent-activity')}
                     className={`w-full flex items-center px-4 py-2 text-left rounded-md ${
                       activeSection === 'recent-activity'
-                        ? 'bg-white text-black'
-                        : 'text-gray-300 hover:bg-white hover:text-black'
+                        ? 'bg-gray-100 text-black'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-black'
                     }`}
                   >
                     <Bell className="h-5 w-5 mr-3" />
@@ -305,8 +305,8 @@ export default function Dashboard() {
                     onClick={() => setActiveSection('alerts-feed')}
                     className={`w-full flex items-center px-4 py-2 text-left rounded-md ${
                       activeSection === 'alerts-feed'
-                        ? 'bg-white text-black'
-                        : 'text-gray-300 hover:bg-white hover:text-black'
+                        ? 'bg-gray-100 text-black'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-black'
                     }`}
                   >
                     <TrendingUp className="h-5 w-5 mr-3" />
@@ -316,7 +316,7 @@ export default function Dashboard() {
               </ul>
             </nav>
             <div className="px-4 py-6">
-              <button className="flex items-center px-4 py-2 text-gray-300 hover:bg-white hover:text-black rounded-md w-full">
+              <button className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 hover:text-black rounded-md w-full">
                 <LogOut className="h-5 w-5 mr-3" />
                 Logout
               </button>
