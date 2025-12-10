@@ -47,6 +47,7 @@ interface Category {
     _id: string;
     name: string;
   } | string;
+  showInHeader?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -55,6 +56,7 @@ interface EditingCategory {
   id: string;
   name: string;
   description: string;
+  showInHeader?: boolean;
 }
 
 export default function AdminDashboard() {
@@ -164,7 +166,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const createCategory = async () => {
+  const createCategory = async (showInHeader: boolean = false) => {
     if (!newCategoryName.trim()) {
       setError('Category name is required');
       return;
@@ -180,6 +182,7 @@ export default function AdminDashboard() {
           name: newCategoryName.trim(),
           description: newCategoryDescription.trim(),
           parent: newCategoryParent || undefined,
+          showInHeader,
         }),
       });
 
@@ -187,6 +190,9 @@ export default function AdminDashboard() {
         setNewCategoryName('');
         setNewCategoryDescription('');
         setNewCategoryParent('');
+        // Reset checkbox
+        const checkbox = document.getElementById('newShowInHeader') as HTMLInputElement;
+        if (checkbox) checkbox.checked = false;
         fetchCategories(); // Refresh categories
       } else {
         const data = await response.json();
@@ -198,7 +204,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const updateCategory = async (categoryId: string, name: string, description: string) => {
+  const updateCategory = async (categoryId: string, name: string, description: string, showInHeader?: boolean) => {
     if (!name.trim()) {
       setError('Category name is required');
       return;
@@ -210,7 +216,7 @@ export default function AdminDashboard() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name: name.trim(), description: description.trim() }),
+        body: JSON.stringify({ name: name.trim(), description: description.trim(), showInHeader }),
       });
 
       if (response.ok) {
@@ -244,6 +250,30 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error deleting category:', error);
       setError('Failed to delete category');
+    }
+  };
+
+  const toggleHeaderVisibility = async (categoryId: string, currentShowInHeader: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/categories/${categoryId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          showInHeader: !currentShowInHeader,
+        }),
+      });
+
+      if (response.ok) {
+        fetchCategories(); // Refresh categories
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Failed to update header visibility');
+      }
+    } catch (error) {
+      console.error('Error updating header visibility:', error);
+      setError('Failed to update header visibility');
     }
   };
 
@@ -370,15 +400,13 @@ export default function AdminDashboard() {
         <div className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                Welcome back, {session.user?.name}!
-              </h1>
+              <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {session.user?.name}!</h1>
               <p className="text-lg text-muted">
                 Your personal dashboard for market insights and account management.
               </p>
             </div>
 
-            {/* DASHBOARD SECTION */}
+            {/* Conditional Content */}
             {activeSection === 'dashboard' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Profile Section */}
@@ -391,20 +419,18 @@ export default function AdminDashboard() {
                       </div>
                       <h3 className="text-lg font-medium text-gray-900">{session.user?.name}</h3>
                       <p className="text-gray-500 mb-4">{session.user?.email}</p>
-                      <span
-                        className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
-                          session.user?.role === 'admin'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-green-100 text-green-800'
-                        }`}
-                      >
+                      <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
+                        session.user?.role === 'admin'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}>
                         {session.user?.role}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Quick Actions + Recent Activity */}
+                {/* Quick Actions */}
                 <div className="lg:col-span-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-white overflow-hidden shadow rounded-lg p-6">
@@ -444,7 +470,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Alerts Feed on dashboard */}
+                  {/* Alerts Feed */}
                   <div className="bg-white overflow-hidden shadow rounded-lg p-6 mt-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Alerts Feed</h3>
                     <div className="space-y-4">
@@ -452,13 +478,8 @@ export default function AdminDashboard() {
                         <div className="flex items-start gap-3">
                           <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                           <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 mb-1">
-                              Breaking: Tech Stocks Surge Amid AI Optimism
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-2">
-                              Major technology companies report strong quarterly earnings, driving market
-                              confidence in AI investments.
-                            </p>
+                            <h4 className="font-semibold text-gray-900 mb-1">Breaking: Tech Stocks Surge Amid AI Optimism</h4>
+                            <p className="text-sm text-gray-600 mb-2">Major technology companies report strong quarterly earnings, driving market confidence in AI investments.</p>
                             <div className="flex items-center gap-4 text-xs text-gray-500">
                               <span>2 hours ago</span>
                               <button className="text-blue-600 hover:text-blue-800">Read More</button>
@@ -471,13 +492,8 @@ export default function AdminDashboard() {
                         <div className="flex items-start gap-3">
                           <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
                           <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 mb-1">
-                              Federal Reserve Signals Potential Rate Cuts
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-2">
-                              Economic indicators suggest the Fed may reduce interest rates in the coming
-                              months to support growth.
-                            </p>
+                            <h4 className="font-semibold text-gray-900 mb-1">Federal Reserve Signals Potential Rate Cuts</h4>
+                            <p className="text-sm text-gray-600 mb-2">Economic indicators suggest the Fed may reduce interest rates in the coming months to support growth.</p>
                             <div className="flex items-center gap-4 text-xs text-gray-500">
                               <span>4 hours ago</span>
                               <button className="text-blue-600 hover:text-blue-800">Read More</button>
@@ -491,7 +507,6 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* PROFILE SECTION */}
             {activeSection === 'profile' && (
               <div className="financial-card p-6 max-w-md">
                 <h2 className="text-xl font-semibold text-foreground mb-6">Profile</h2>
@@ -501,89 +516,68 @@ export default function AdminDashboard() {
                   </div>
                   <h3 className="text-lg font-medium text-foreground">{session.user?.name}</h3>
                   <p className="text-muted mb-4">{session.user?.email}</p>
-                  <span
-                    className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
-                      session.user?.role === 'admin'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-green-100 text-green-800'
-                    }`}
-                  >
+                  <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
+                    session.user?.role === 'admin'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-green-100 text-green-800'
+                  }`}>
                     {session.user?.role}
                   </span>
                 </div>
               </div>
             )}
 
-            {/* CATEGORY SECTION */}
             {activeSection === 'category' && (
               <div className="bg-white shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    Category Management
-                  </h3>
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Category Management</h3>
 
                   {/* Create Category Form */}
                   <div className="mb-6">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
-                        <label
-                          htmlFor="categoryName"
-                          className="block text-sm font-medium text-gray-700"
-                        >
+                        <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700">
                           Category Name
                         </label>
                         <input
                           type="text"
                           id="categoryName"
                           value={newCategoryName}
-                          onChange={e => setNewCategoryName(e.target.value)}
+                          onChange={(e) => setNewCategoryName(e.target.value)}
                           className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                           placeholder="Enter category name"
                         />
                       </div>
                       <div>
-                        <label
-                          htmlFor="categoryDescription"
-                          className="block text-sm font-medium text-gray-700"
-                        >
+                        <label htmlFor="categoryDescription" className="block text-sm font-medium text-gray-700">
                           Description (Optional)
                         </label>
                         <input
                           type="text"
                           id="categoryDescription"
                           value={newCategoryDescription}
-                          onChange={e => setNewCategoryDescription(e.target.value)}
+                          onChange={(e) => setNewCategoryDescription(e.target.value)}
                           className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                           placeholder="Enter description"
                         />
                       </div>
-                      <div>
-                        <label
-                          htmlFor="categoryParent"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Parent Category (Optional)
-                        </label>
-                        <select
-                          id="categoryParent"
-                          value={newCategoryParent}
-                          onChange={e => setNewCategoryParent(e.target.value)}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        >
-                          <option value="">No Parent (Top Level)</option>
-                          {categories
-                            .filter(cat => !cat.parent) // Only show top-level categories as potential parents
-                            .map(category => (
-                              <option key={category._id} value={category._id}>
-                                {category.name}
-                              </option>
-                            ))}
-                        </select>
-                      </div>
+                    </div>
+                    <div className="mt-4 flex items-center">
+                      <input
+                        type="checkbox"
+                        id="newShowInHeader"
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="newShowInHeader" className="ml-2 block text-sm text-gray-900">
+                        Show in Header
+                      </label>
                     </div>
                     <div className="mt-4">
                       <button
-                        onClick={createCategory}
+                        onClick={() => {
+                          const checkbox = document.getElementById('newShowInHeader') as HTMLInputElement;
+                          createCategory(checkbox?.checked || false);
+                        }}
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
                         <FolderPlus className="mr-2 h-4 w-4" />
@@ -592,211 +586,82 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Edit Category Form */}
-                  {editingCategory && (
-                    <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                      <h4 className="text-lg font-medium text-gray-900 mb-4">Edit Category</h4>
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <div>
-                          <label
-                            htmlFor="editCategoryName"
-                            className="block text-sm font-medium text-gray-700"
-                          >
-                            Category Name
-                          </label>
-                          <input
-                            type="text"
-                            id="editCategoryName"
-                            value={editingCategory.name}
-                            onChange={e => setEditingCategory({ ...editingCategory, name: e.target.value })}
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            placeholder="Enter category name"
-                          />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="editCategoryDescription"
-                            className="block text-sm font-medium text-gray-700"
-                          >
-                            Description (Optional)
-                          </label>
-                          <input
-                            type="text"
-                            id="editCategoryDescription"
-                            value={editingCategory.description}
-                            onChange={e => setEditingCategory({ ...editingCategory, description: e.target.value })}
-                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            placeholder="Enter description"
-                          />
-                        </div>
-                      </div>
-                      <div className="mt-4 flex space-x-2">
-                        <button
-                          onClick={async () => {
-                            if (!editingCategory.name.trim()) {
-                              setError('Category name is required');
-                              return;
-                            }
-
-                            try {
-                              const response = await fetch(`/api/admin/categories/${editingCategory.id}`, {
-                                method: 'PUT',
-                                headers: {
-                                  'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({
-                                  name: editingCategory.name.trim(),
-                                  description: editingCategory.description.trim()
-                                }),
-                              });
-
-                              if (response.ok) {
-                                setEditingCategory(null);
-                                fetchCategories(); // Refresh categories
-                                setError(''); // Clear any previous errors
-                              } else {
-                                const data = await response.json();
-                                setError(data.error || 'Failed to update category');
-                              }
-                            } catch (error) {
-                              console.error('Error updating category:', error);
-                              setError('Failed to update category');
-                            }
-                          }}
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                        >
-                          Save Changes
-                        </button>
-                        <button
-                          onClick={() => setEditingCategory(null)}
-                          className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Main Categories */}
-                  <div className="space-y-6">
-                    {categories
-                      .filter(category => !category.parent) // Only show main categories
-                      .map(category => {
-                        const subcategories = categories.filter(cat => cat.parent === category._id || (typeof cat.parent === 'object' && cat.parent?._id === category._id));
-                        console.log('Category:', category._id, 'Subcategories:', subcategories.map(s => s._id));
-
-                        return (
-                          <div key={category._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                            {/* Main Category Header */}
-                            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4">
-                                  <h4 className="text-lg font-medium text-gray-900">{category.name}</h4>
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    Main Category
-                                  </span>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <button
-                                    onClick={() => {
-                                      setEditingCategory({
-                                        id: category._id,
-                                        name: category.name,
-                                        description: category.description || ''
-                                      });
-                                      document.getElementById('editCategoryName')?.focus();
-                                    }}
-                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                                  >
-                                    <Edit className="h-4 w-4 mr-1" />
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setNewCategoryParent(category._id);
-                                      // Scroll to form or focus on name input
-                                      document.getElementById('categoryName')?.focus();
-                                    }}
-                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                  >
-                                    <FolderPlus className="h-4 w-4 mr-1" />
-                                    Add Subcategory
-                                  </button>
-                                  <button
-                                    onClick={() => deleteCategory(category._id)}
-                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                  >
-                                    <Trash2 className="h-4 w-4 mr-1" />
-                                    Delete
-                                  </button>
-                                </div>
-                              </div>
-                              <div className="mt-2 text-sm text-gray-600">
-                                <p>{category.description || 'No description'}</p>
-                                <p className="text-xs text-gray-500 mt-1">
-                                  Slug: {category.slug} • Created: {new Date(category.createdAt).toLocaleDateString()}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* Subcategories Section */}
-                            <div className="px-6 py-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <h5 className="text-sm font-medium text-gray-900">
-                                  Subcategories ({subcategories.length})
-                                </h5>
-                              </div>
-
-                              {subcategories.length > 0 ? (
-                                <div className="space-y-2">
-                                  {subcategories.map(subcategory => (
-                                    <div key={subcategory._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                                      <div className="flex items-center space-x-3">
-                                        <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                                        <div>
-                                          <p className="text-sm font-medium text-gray-900">{subcategory.name}</p>
-                                          <p className="text-xs text-gray-500">
-                                            {subcategory.description || 'No description'} • Slug: {subcategory.slug}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <div className="flex items-center space-x-2">
-                                        <button
-                                          onClick={() => {
-                                            setEditingCategory({
-                                              id: subcategory._id,
-                                              name: subcategory.name,
-                                              description: subcategory.description || ''
-                                            });
-                                            document.getElementById('editCategoryName')?.focus();
-                                          }}
-                                          className="text-gray-600 hover:text-gray-900 p-1"
-                                        >
-                                          <Edit className="h-4 w-4" />
-                                        </button>
-                                        <button
-                                          onClick={() => deleteCategory(subcategory._id)}
-                                          className="text-red-600 hover:text-red-900 p-1"
-                                        >
-                                          <Trash2 className="h-4 w-4" />
-                                        </button>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <p className="text-sm text-gray-500 italic">No subcategories yet</p>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
+                  {/* Categories Table */}
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Description
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Slug
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Show in Header
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Created
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {categories.map((category) => (
+                          <tr key={category._id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <input
+                                type="text"
+                                value={category.name}
+                                onChange={(e) => updateCategory(category._id, e.target.value, category.description || '', category.showInHeader)}
+                                className="text-sm font-medium text-gray-900 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
+                              />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <input
+                                type="text"
+                                value={category.description || ''}
+                                onChange={(e) => updateCategory(category._id, category.name, e.target.value, category.showInHeader)}
+                                className="text-sm text-gray-500 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
+                                placeholder="No description"
+                              />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {category.slug}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <input
+                                type="checkbox"
+                                checked={category.showInHeader || false}
+                                onChange={() => toggleHeaderVisibility(category._id, category.showInHeader || false)}
+                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                              />
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {new Date(category.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
+                                onClick={() => deleteCategory(category._id)}
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* QUICK ACTIONS SECTION */}
             {activeSection === 'quick-actions' && (
               <div className="financial-card p-6 max-w-md">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
@@ -817,7 +682,6 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* RECENT ACTIVITY SECTION */}
             {activeSection === 'recent-activity' && (
               <div className="financial-card p-6 max-w-md">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h3>
@@ -838,23 +702,16 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* ALERTS FEED SECTION (SEPARATE TAB) */}
             {activeSection === 'alerts-feed' && (
               <div className="financial-card p-6">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Alerts Feed</h3>
                 <div className="space-y-4">
-                  {/* Card 1 */}
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          Breaking: Tech Stocks Surge Amid AI Optimism
-                        </h4>
-                        <p className="text-sm text-muted mb-2">
-                          Major technology companies report strong quarterly earnings, driving market
-                          confidence in AI investments.
-                        </p>
+                        <h4 className="font-semibold text-foreground mb-1">Breaking: Tech Stocks Surge Amid AI Optimism</h4>
+                        <p className="text-sm text-muted mb-2">Major technology companies report strong quarterly earnings, driving market confidence in AI investments.</p>
                         <div className="flex items-center gap-4 text-xs text-muted">
                           <span>2 hours ago</span>
                           <button className="text-blue-600 hover:text-blue-800">Read More</button>
@@ -863,18 +720,12 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Card 2 */}
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          Federal Reserve Signals Potential Rate Cuts
-                        </h4>
-                        <p className="text-sm text-muted mb-2">
-                          Economic indicators suggest the Fed may reduce interest rates in the coming
-                          months to support growth.
-                        </p>
+                        <h4 className="font-semibold text-foreground mb-1">Federal Reserve Signals Potential Rate Cuts</h4>
+                        <p className="text-sm text-muted mb-2">Economic indicators suggest the Fed may reduce interest rates in the coming months to support growth.</p>
                         <div className="flex items-center gap-4 text-xs text-muted">
                           <span>4 hours ago</span>
                           <button className="text-blue-600 hover:text-blue-800">Read More</button>
@@ -883,17 +734,12 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Card 3 */}
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          Oil Prices Reach 6-Month High
-                        </h4>
-                        <p className="text-sm text-muted mb-2">
-                          Global supply concerns push crude oil prices to their highest level since March.
-                        </p>
+                        <h4 className="font-semibold text-foreground mb-1">Oil Prices Reach 6-Month High</h4>
+                        <p className="text-sm text-muted mb-2">Global supply concerns push crude oil prices to their highest level since March.</p>
                         <div className="flex items-center gap-4 text-xs text-muted">
                           <span>6 hours ago</span>
                           <button className="text-blue-600 hover:text-blue-800">Read More</button>
@@ -902,17 +748,12 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Card 4 */}
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          Cryptocurrency Market Shows Signs of Recovery
-                        </h4>
-                        <p className="text-sm text-muted mb-2">
-                          Bitcoin and major altcoins gain momentum as institutional adoption increases.
-                        </p>
+                        <h4 className="font-semibold text-foreground mb-1">Cryptocurrency Market Shows Signs of Recovery</h4>
+                        <p className="text-sm text-muted mb-2">Bitcoin and major altcoins gain momentum as institutional adoption increases.</p>
                         <div className="flex items-center gap-4 text-xs text-muted">
                           <span>8 hours ago</span>
                           <button className="text-blue-600 hover:text-blue-800">Read More</button>
@@ -921,18 +762,12 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Card 5 */}
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          Trade Tensions Escalate Between Major Economies
-                        </h4>
-                        <p className="text-sm text-muted mb-2">
-                          New tariffs announced, potentially impacting global supply chains and market
-                          stability.
-                        </p>
+                        <h4 className="font-semibold text-foreground mb-1">Trade Tensions Escalate Between Major Economies</h4>
+                        <p className="text-sm text-muted mb-2">New tariffs announced, potentially impacting global supply chains and market stability.</p>
                         <div className="flex items-center gap-4 text-xs text-muted">
                           <span>12 hours ago</span>
                           <button className="text-blue-600 hover:text-blue-800">Read More</button>

@@ -6,7 +6,7 @@ import Category from '@/models/Category';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authConfig);
@@ -15,36 +15,53 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, description, parent } = await request.json();
-
-    if (!name || !name.trim()) {
-      return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
-    }
+    const { name, description, parent, showInHeader } = await request.json();
 
     await dbConnect();
 
-    const category = await Category.findById(params.id);
+    const { id } = await params;
+    const category = await Category.findById(id);
     if (!category) {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 });
     }
 
-    // Check if another category with the same name exists
-    const existingCategory = await Category.findOne({
-      name: name.trim(),
-      _id: { $ne: params.id }
-    });
-    if (existingCategory) {
-      return NextResponse.json({ error: 'Category name already exists' }, { status: 400 });
+    // Update showInHeader if provided
+    if (showInHeader !== undefined) {
+      category.showInHeader = showInHeader;
     }
 
-    category.name = name.trim();
-    category.description = description?.trim();
-    category.slug = name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    category.parent = parent || undefined;
+    // Update name if provided
+    if (name !== undefined) {
+      if (!name || !name.trim()) {
+        return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
+      }
+
+      // Check if another category with the same name exists
+      const existingCategory = await Category.findOne({
+        name: name.trim(),
+        _id: { $ne: id }
+      });
+      if (existingCategory) {
+        return NextResponse.json({ error: 'Category name already exists' }, { status: 400 });
+      }
+
+      category.name = name.trim();
+      category.slug = name.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    }
+
+    // Update description if provided
+    if (description !== undefined) {
+      category.description = description?.trim();
+    }
+
+    // Update parent if provided
+    if (parent !== undefined) {
+      category.parent = parent || undefined;
+    }
 
     await category.save();
 
-    const updatedCategory = await Category.findById(params.id).populate('parent', 'name');
+    const updatedCategory = await Category.findById(id).populate('parent', 'name');
 
     return NextResponse.json({ category: updatedCategory });
   } catch (error) {
@@ -55,7 +72,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authConfig);
@@ -66,20 +83,21 @@ export async function DELETE(
 
     await dbConnect();
 
-    const category = await Category.findById(params.id);
+    const { id } = await params;
+    const category = await Category.findById(id);
     if (!category) {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 });
     }
 
     // Check if category has subcategories
-    const subcategories = await Category.find({ parent: params.id });
+    const subcategories = await Category.find({ parent: id });
     if (subcategories.length > 0) {
       return NextResponse.json({
         error: 'Cannot delete category with subcategories. Please delete or reassign subcategories first.'
       }, { status: 400 });
     }
 
-    await Category.findByIdAndDelete(params.id);
+    await Category.findByIdAndDelete(id);
 
     return NextResponse.json({ message: 'Category deleted successfully' });
   } catch (error) {

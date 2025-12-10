@@ -6,11 +6,41 @@ import { Search, ChevronDown } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import AuthModal from './AuthModal';
 
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+}
+
 export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [headerCategories, setHeaderCategories] = useState<Category[]>([]);
   const { data: session } = useSession();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch header categories
+  useEffect(() => {
+    async function fetchHeaderCategories() {
+      try {
+        const response = await fetch('/api/categories/header');
+        if (response.ok) {
+          const data = await response.json();
+          setHeaderCategories(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch header categories:', error);
+      }
+    }
+
+    // Fetch immediately on mount
+    fetchHeaderCategories();
+
+    // Set up interval to fetch every 10 seconds
+    const interval = setInterval(fetchHeaderCategories, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -158,15 +188,15 @@ export default function Header() {
         <div className="bg-[#101010] border-b border-white/10">
           <div className="max-w-7xl mx-auto px-4 py-2 overflow-x-auto">
             <nav className="flex gap-5 text-xs whitespace-nowrap text-gray-400">
-              <Link href="#" className="hover:text-yellow-400">United States</Link>
-              <Link href="#" className="hover:text-yellow-400">Major Indices</Link>
-              <Link href="#" className="hover:text-yellow-400">Index Futures</Link>
-              <Link href="#" className="hover:text-yellow-400">Commodities</Link>
-              <Link href="#" className="hover:text-yellow-400">Pre-Market</Link>
-              <Link href="#" className="hover:text-yellow-400">After Hours</Link>
-              <Link href="#" className="hover:text-yellow-400">Bitcoin</Link>
-              <Link href="#" className="hover:text-yellow-400">Earnings Calendar</Link>
-              <Link href="#" className="hover:text-yellow-400">Stocks Picked by AI</Link>
+              {headerCategories.map(category => (
+                <Link
+                  key={category._id}
+                  href={`/category/${category.slug}`}
+                  className="hover:text-yellow-400"
+                >
+                  {category.name}
+                </Link>
+              ))}
             </nav>
           </div>
         </div>
