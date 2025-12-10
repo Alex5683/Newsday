@@ -43,9 +43,18 @@ interface Category {
   name: string;
   description?: string;
   slug: string;
-  parent?: string;
+  parent?: {
+    _id: string;
+    name: string;
+  } | string;
   createdAt: string;
   updatedAt: string;
+}
+
+interface EditingCategory {
+  id: string;
+  name: string;
+  description: string;
 }
 
 export default function AdminDashboard() {
@@ -59,7 +68,8 @@ export default function AdminDashboard() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
   const [newCategoryParent, setNewCategoryParent] = useState('');
-  const [activeSection, setActiveSection] = useState('dashboard');
+  const [editingCategory, setEditingCategory] = useState<EditingCategory | null>(null);
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'profile' | 'category' | 'quick-actions' | 'recent-activity' | 'alerts-feed'>('dashboard');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -225,8 +235,11 @@ export default function AdminDashboard() {
 
       if (response.ok) {
         setCategories(categories.filter(category => category._id !== categoryId));
+        setError(''); // Clear any previous errors
       } else {
-        setError('Failed to delete category');
+        const data = await response.json();
+        console.error('Delete failed:', data);
+        setError(data.error || 'Failed to delete category');
       }
     } catch (error) {
       console.error('Error deleting category:', error);
@@ -511,7 +524,7 @@ export default function AdminDashboard() {
 
                   {/* Create Category Form */}
                   <div className="mb-6">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                       <div>
                         <label
                           htmlFor="categoryName"
@@ -544,6 +557,29 @@ export default function AdminDashboard() {
                           placeholder="Enter description"
                         />
                       </div>
+                      <div>
+                        <label
+                          htmlFor="categoryParent"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Parent Category (Optional)
+                        </label>
+                        <select
+                          id="categoryParent"
+                          value={newCategoryParent}
+                          onChange={e => setNewCategoryParent(e.target.value)}
+                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                          <option value="">No Parent (Top Level)</option>
+                          {categories
+                            .filter(cat => !cat.parent) // Only show top-level categories as potential parents
+                            .map(category => (
+                              <option key={category._id} value={category._id}>
+                                {category.name}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
                     </div>
                     <div className="mt-4">
                       <button
@@ -556,74 +592,205 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Categories Table */}
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Description
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Slug
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Created
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {categories.map(category => (
-                          <tr key={category._id}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="text"
-                                value={category.name}
-                                onChange={e =>
-                                  updateCategory(
-                                    category._id,
-                                    e.target.value,
-                                    category.description || ''
-                                  )
-                                }
-                                className="text-sm font-medium text-gray-900 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="text"
-                                value={category.description || ''}
-                                onChange={e =>
-                                  updateCategory(category._id, category.name, e.target.value)
-                                }
-                                className="text-sm text-gray-500 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
-                                placeholder="No description"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {category.slug}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {new Date(category.createdAt).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => deleteCategory(category._id)}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  {/* Edit Category Form */}
+                  {editingCategory && (
+                    <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <h4 className="text-lg font-medium text-gray-900 mb-4">Edit Category</h4>
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                          <label
+                            htmlFor="editCategoryName"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Category Name
+                          </label>
+                          <input
+                            type="text"
+                            id="editCategoryName"
+                            value={editingCategory.name}
+                            onChange={e => setEditingCategory({ ...editingCategory, name: e.target.value })}
+                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            placeholder="Enter category name"
+                          />
+                        </div>
+                        <div>
+                          <label
+                            htmlFor="editCategoryDescription"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Description (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            id="editCategoryDescription"
+                            value={editingCategory.description}
+                            onChange={e => setEditingCategory({ ...editingCategory, description: e.target.value })}
+                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            placeholder="Enter description"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-4 flex space-x-2">
+                        <button
+                          onClick={async () => {
+                            if (!editingCategory.name.trim()) {
+                              setError('Category name is required');
+                              return;
+                            }
+
+                            try {
+                              const response = await fetch(`/api/admin/categories/${editingCategory.id}`, {
+                                method: 'PUT',
+                                headers: {
+                                  'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                  name: editingCategory.name.trim(),
+                                  description: editingCategory.description.trim()
+                                }),
+                              });
+
+                              if (response.ok) {
+                                setEditingCategory(null);
+                                fetchCategories(); // Refresh categories
+                                setError(''); // Clear any previous errors
+                              } else {
+                                const data = await response.json();
+                                setError(data.error || 'Failed to update category');
+                              }
+                            } catch (error) {
+                              console.error('Error updating category:', error);
+                              setError('Failed to update category');
+                            }
+                          }}
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        >
+                          Save Changes
+                        </button>
+                        <button
+                          onClick={() => setEditingCategory(null)}
+                          className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Main Categories */}
+                  <div className="space-y-6">
+                    {categories
+                      .filter(category => !category.parent) // Only show main categories
+                      .map(category => {
+                        const subcategories = categories.filter(cat => cat.parent === category._id || (typeof cat.parent === 'object' && cat.parent?._id === category._id));
+                        console.log('Category:', category._id, 'Subcategories:', subcategories.map(s => s._id));
+
+                        return (
+                          <div key={category._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                            {/* Main Category Header */}
+                            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                  <h4 className="text-lg font-medium text-gray-900">{category.name}</h4>
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    Main Category
+                                  </span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <button
+                                    onClick={() => {
+                                      setEditingCategory({
+                                        id: category._id,
+                                        name: category.name,
+                                        description: category.description || ''
+                                      });
+                                      document.getElementById('editCategoryName')?.focus();
+                                    }}
+                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                                  >
+                                    <Edit className="h-4 w-4 mr-1" />
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setNewCategoryParent(category._id);
+                                      // Scroll to form or focus on name input
+                                      document.getElementById('categoryName')?.focus();
+                                    }}
+                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                  >
+                                    <FolderPlus className="h-4 w-4 mr-1" />
+                                    Add Subcategory
+                                  </button>
+                                  <button
+                                    onClick={() => deleteCategory(category._id)}
+                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-1" />
+                                    Delete
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="mt-2 text-sm text-gray-600">
+                                <p>{category.description || 'No description'}</p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Slug: {category.slug} • Created: {new Date(category.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Subcategories Section */}
+                            <div className="px-6 py-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <h5 className="text-sm font-medium text-gray-900">
+                                  Subcategories ({subcategories.length})
+                                </h5>
+                              </div>
+
+                              {subcategories.length > 0 ? (
+                                <div className="space-y-2">
+                                  {subcategories.map(subcategory => (
+                                    <div key={subcategory._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                                      <div className="flex items-center space-x-3">
+                                        <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                                        <div>
+                                          <p className="text-sm font-medium text-gray-900">{subcategory.name}</p>
+                                          <p className="text-xs text-gray-500">
+                                            {subcategory.description || 'No description'} • Slug: {subcategory.slug}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center space-x-2">
+                                        <button
+                                          onClick={() => {
+                                            setEditingCategory({
+                                              id: subcategory._id,
+                                              name: subcategory.name,
+                                              description: subcategory.description || ''
+                                            });
+                                            document.getElementById('editCategoryName')?.focus();
+                                          }}
+                                          className="text-gray-600 hover:text-gray-900 p-1"
+                                        >
+                                          <Edit className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          onClick={() => deleteCategory(subcategory._id)}
+                                          className="text-red-600 hover:text-red-900 p-1"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-sm text-gray-500 italic">No subcategories yet</p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
               </div>
