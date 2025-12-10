@@ -3,22 +3,7 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import {
-  Users,
-  UserCheck,
-  UserPlus,
-  Shield,
-  Trash2,
-  Edit,
-  FolderPlus,
-  Folder,
-  Home,
-  User,
-  Settings,
-  Bell,
-  TrendingUp,
-  LogOut,
-} from 'lucide-react';
+import { Users, UserCheck, UserPlus, Shield, Trash2, Edit, FolderPlus, Folder, Home, User, Settings, Bell, TrendingUp, LogOut } from 'lucide-react';
 
 interface User {
   _id: string;
@@ -43,7 +28,6 @@ interface Category {
   name: string;
   description?: string;
   slug: string;
-  parent?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -58,7 +42,6 @@ export default function AdminDashboard() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
-  const [newCategoryParent, setNewCategoryParent] = useState('');
   const [activeSection, setActiveSection] = useState('dashboard');
 
   useEffect(() => {
@@ -111,7 +94,9 @@ export default function AdminDashboard() {
       });
 
       if (response.ok) {
-        setUsers(users.map(user => (user._id === userId ? { ...user, role: newRole } : user)));
+        setUsers(users.map(user =>
+          user._id === userId ? { ...user, role: newRole } : user
+        ));
         fetchStats(); // Refresh stats
       } else {
         setError('Failed to update user role');
@@ -169,14 +154,12 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           name: newCategoryName.trim(),
           description: newCategoryDescription.trim(),
-          parent: newCategoryParent || undefined,
         }),
       });
 
       if (response.ok) {
         setNewCategoryName('');
         setNewCategoryDescription('');
-        setNewCategoryParent('');
         fetchCategories(); // Refresh categories
       } else {
         const data = await response.json();
@@ -357,15 +340,13 @@ export default function AdminDashboard() {
         <div className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-foreground mb-2">
-                Welcome back, {session.user?.name}!
-              </h1>
+              <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back, {session.user?.name}!</h1>
               <p className="text-lg text-muted">
                 Your personal dashboard for market insights and account management.
               </p>
             </div>
 
-            {/* DASHBOARD SECTION */}
+            {/* Conditional Content */}
             {activeSection === 'dashboard' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Profile Section */}
@@ -378,20 +359,18 @@ export default function AdminDashboard() {
                       </div>
                       <h3 className="text-lg font-medium text-gray-900">{session.user?.name}</h3>
                       <p className="text-gray-500 mb-4">{session.user?.email}</p>
-                      <span
-                        className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
-                          session.user?.role === 'admin'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-green-100 text-green-800'
-                        }`}
-                      >
+                      <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
+                        session.user?.role === 'admin'
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}>
                         {session.user?.role}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Quick Actions + Recent Activity */}
+                {/* Quick Actions */}
                 <div className="lg:col-span-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="bg-white overflow-hidden shadow rounded-lg p-6">
@@ -431,7 +410,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Alerts Feed on dashboard */}
+                  {/* Alerts Feed */}
                   <div className="bg-white overflow-hidden shadow rounded-lg p-6 mt-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Alerts Feed</h3>
                     <div className="space-y-4">
@@ -439,13 +418,8 @@ export default function AdminDashboard() {
                         <div className="flex items-start gap-3">
                           <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                           <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 mb-1">
-                              Breaking: Tech Stocks Surge Amid AI Optimism
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-2">
-                              Major technology companies report strong quarterly earnings, driving market
-                              confidence in AI investments.
-                            </p>
+                            <h4 className="font-semibold text-gray-900 mb-1">Breaking: Tech Stocks Surge Amid AI Optimism</h4>
+                            <p className="text-sm text-gray-600 mb-2">Major technology companies report strong quarterly earnings, driving market confidence in AI investments.</p>
                             <div className="flex items-center gap-4 text-xs text-gray-500">
                               <span>2 hours ago</span>
                               <button className="text-blue-600 hover:text-blue-800">Read More</button>
@@ -458,13 +432,8 @@ export default function AdminDashboard() {
                         <div className="flex items-start gap-3">
                           <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
                           <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 mb-1">
-                              Federal Reserve Signals Potential Rate Cuts
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-2">
-                              Economic indicators suggest the Fed may reduce interest rates in the coming
-                              months to support growth.
-                            </p>
+                            <h4 className="font-semibold text-gray-900 mb-1">Federal Reserve Signals Potential Rate Cuts</h4>
+                            <p className="text-sm text-gray-600 mb-2">Economic indicators suggest the Fed may reduce interest rates in the coming months to support growth.</p>
                             <div className="flex items-center gap-4 text-xs text-gray-500">
                               <span>4 hours ago</span>
                               <button className="text-blue-600 hover:text-blue-800">Read More</button>
@@ -478,7 +447,6 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* PROFILE SECTION */}
             {activeSection === 'profile' && (
               <div className="financial-card p-6 max-w-md">
                 <h2 className="text-xl font-semibold text-foreground mb-6">Profile</h2>
@@ -488,58 +456,47 @@ export default function AdminDashboard() {
                   </div>
                   <h3 className="text-lg font-medium text-foreground">{session.user?.name}</h3>
                   <p className="text-muted mb-4">{session.user?.email}</p>
-                  <span
-                    className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
-                      session.user?.role === 'admin'
-                        ? 'bg-red-100 text-red-800'
-                        : 'bg-green-100 text-green-800'
-                    }`}
-                  >
+                  <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${
+                    session.user?.role === 'admin'
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-green-100 text-green-800'
+                  }`}>
                     {session.user?.role}
                   </span>
                 </div>
               </div>
             )}
 
-            {/* CATEGORY SECTION */}
             {activeSection === 'category' && (
               <div className="bg-white shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-                    Category Management
-                  </h3>
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Category Management</h3>
 
                   {/* Create Category Form */}
                   <div className="mb-6">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
-                        <label
-                          htmlFor="categoryName"
-                          className="block text-sm font-medium text-gray-700"
-                        >
+                        <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700">
                           Category Name
                         </label>
                         <input
                           type="text"
                           id="categoryName"
                           value={newCategoryName}
-                          onChange={e => setNewCategoryName(e.target.value)}
+                          onChange={(e) => setNewCategoryName(e.target.value)}
                           className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                           placeholder="Enter category name"
                         />
                       </div>
                       <div>
-                        <label
-                          htmlFor="categoryDescription"
-                          className="block text-sm font-medium text-gray-700"
-                        >
+                        <label htmlFor="categoryDescription" className="block text-sm font-medium text-gray-700">
                           Description (Optional)
                         </label>
                         <input
                           type="text"
                           id="categoryDescription"
                           value={newCategoryDescription}
-                          onChange={e => setNewCategoryDescription(e.target.value)}
+                          onChange={(e) => setNewCategoryDescription(e.target.value)}
                           className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                           placeholder="Enter description"
                         />
@@ -579,19 +536,13 @@ export default function AdminDashboard() {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {categories.map(category => (
+                        {categories.map((category) => (
                           <tr key={category._id}>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <input
                                 type="text"
                                 value={category.name}
-                                onChange={e =>
-                                  updateCategory(
-                                    category._id,
-                                    e.target.value,
-                                    category.description || ''
-                                  )
-                                }
+                                onChange={(e) => updateCategory(category._id, e.target.value, category.description || '')}
                                 className="text-sm font-medium text-gray-900 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
                               />
                             </td>
@@ -599,9 +550,7 @@ export default function AdminDashboard() {
                               <input
                                 type="text"
                                 value={category.description || ''}
-                                onChange={e =>
-                                  updateCategory(category._id, category.name, e.target.value)
-                                }
+                                onChange={(e) => updateCategory(category._id, category.name, e.target.value)}
                                 className="text-sm text-gray-500 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
                                 placeholder="No description"
                               />
@@ -629,7 +578,6 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* QUICK ACTIONS SECTION */}
             {activeSection === 'quick-actions' && (
               <div className="financial-card p-6 max-w-md">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h3>
@@ -650,7 +598,6 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* RECENT ACTIVITY SECTION */}
             {activeSection === 'recent-activity' && (
               <div className="financial-card p-6 max-w-md">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h3>
@@ -671,23 +618,16 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* ALERTS FEED SECTION (SEPARATE TAB) */}
             {activeSection === 'alerts-feed' && (
               <div className="financial-card p-6">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Alerts Feed</h3>
                 <div className="space-y-4">
-                  {/* Card 1 */}
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          Breaking: Tech Stocks Surge Amid AI Optimism
-                        </h4>
-                        <p className="text-sm text-muted mb-2">
-                          Major technology companies report strong quarterly earnings, driving market
-                          confidence in AI investments.
-                        </p>
+                        <h4 className="font-semibold text-foreground mb-1">Breaking: Tech Stocks Surge Amid AI Optimism</h4>
+                        <p className="text-sm text-muted mb-2">Major technology companies report strong quarterly earnings, driving market confidence in AI investments.</p>
                         <div className="flex items-center gap-4 text-xs text-muted">
                           <span>2 hours ago</span>
                           <button className="text-blue-600 hover:text-blue-800">Read More</button>
@@ -696,18 +636,12 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Card 2 */}
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          Federal Reserve Signals Potential Rate Cuts
-                        </h4>
-                        <p className="text-sm text-muted mb-2">
-                          Economic indicators suggest the Fed may reduce interest rates in the coming
-                          months to support growth.
-                        </p>
+                        <h4 className="font-semibold text-foreground mb-1">Federal Reserve Signals Potential Rate Cuts</h4>
+                        <p className="text-sm text-muted mb-2">Economic indicators suggest the Fed may reduce interest rates in the coming months to support growth.</p>
                         <div className="flex items-center gap-4 text-xs text-muted">
                           <span>4 hours ago</span>
                           <button className="text-blue-600 hover:text-blue-800">Read More</button>
@@ -716,60 +650,41 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Card 3 */}
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          Oil Prices Reach 6-Month High
-                        </h4>
-                        <p className="text-sm text-muted mb-2">
-                          Global supply concerns push crude oil prices to their highest level since March.
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-muted">
-                          <span>6 hours ago</span>
-                          <button className="text-blue-600 hover:text-blue-800">Read More</button>
-                        </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-foreground mb-1">Oil Prices Reach 6-Month High</h4>
+                      <p className="text-sm text-muted mb-2">Global supply concerns push crude oil prices to their highest level since March.</p>
+                      <div className="flex items-center gap-4 text-xs text-muted">
+                        <span>6 hours ago</span>
+                        <button className="text-blue-600 hover:text-blue-800">Read More</button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Card 4 */}
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          Cryptocurrency Market Shows Signs of Recovery
-                        </h4>
-                        <p className="text-sm text-muted mb-2">
-                          Bitcoin and major altcoins gain momentum as institutional adoption increases.
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-muted">
-                          <span>8 hours ago</span>
-                          <button className="text-blue-600 hover:text-blue-800">Read More</button>
-                        </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-foreground mb-1">Cryptocurrency Market Shows Signs of Recovery</h4>
+                      <p className="text-sm text-muted mb-2">Bitcoin and major altcoins gain momentum as institutional adoption increases.</p>
+                      <div className="flex items-center gap-4 text-xs text-muted">
+                        <span>8 hours ago</span>
+                        <button className="text-blue-600 hover:text-blue-800">Read More</button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Card 5 */}
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-foreground mb-1">
-                          Trade Tensions Escalate Between Major Economies
-                        </h4>
-                        <p className="text-sm text-muted mb-2">
-                          New tariffs announced, potentially impacting global supply chains and market
-                          stability.
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-muted">
-                          <span>12 hours ago</span>
-                          <button className="text-blue-600 hover:text-blue-800">Read More</button>
-                        </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-foreground mb-1">Trade Tensions Escalate Between Major Economies</h4>
+                      <p className="text-sm text-muted mb-2">New tariffs announced, potentially impacting global supply chains and market stability.</p>
+                      <div className="flex items-center gap-4 text-xs text-muted">
+                        <span>12 hours ago</span>
+                        <button className="text-blue-600 hover:text-blue-800">Read More</button>
                       </div>
                     </div>
                   </div>

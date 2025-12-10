@@ -52,7 +52,14 @@ export const authConfig: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
+        // For Google sign-ins, fetch the role from database
+        if (user.email) {
+          await dbConnect();
+          const dbUser = await User.findOne({ email: user.email });
+          token.role = dbUser?.role || 'user';
+        } else {
+          token.role = user.role;
+        }
       }
       return token;
     },

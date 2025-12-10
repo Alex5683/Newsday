@@ -75,7 +75,7 @@ export default function Header() {
                   {isDropdownOpen && (
                     <div className="absolute right-0 mt-2 w-48 bg-[#2a2a2a] border border-white/10 rounded-md shadow-lg z-50">
                       <Link
-                        href="/profile"
+                        href="/dashboard"
                         className="block px-4 py-2 text-sm text-white hover:bg-[#3a3a3a]"
                         onClick={() => setIsDropdownOpen(false)}
                       >

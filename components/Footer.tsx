@@ -1,60 +1,63 @@
 export default function Footer() {
   return (
-    <footer className="bg-black text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">NewsDay</h3>
-            <p className="text-gray-300 text-sm">
-              Your trusted source for the latest news and updates.
-            </p>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <a href="/" className="text-gray-300 hover:text-white transition-colors">
-                  Home
-                </a>
-              </li>
-              <li>
-                <a href="/about" className="text-gray-300 hover:text-white transition-colors">
-                  About
-                </a>
-              </li>
-              <li>
-                <a href="/contact" className="text-gray-300 hover:text-white transition-colors">
-                  Contact
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Connect</h3>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
-                <span className="sr-only">Facebook</span>
-                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-              </a>
-              <a href="#" className="text-gray-300 hover:text-white transition-colors">
-                <span className="sr-only">Twitter</span>
-                <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t border-gray-700 mt-8 pt-8 text-center">
-          <p className="text-gray-300 text-sm">
-            © {new Date().getFullYear()} NewsDay. All rights reserved.
+    <footer className="bg-black text-gray-300 text-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        {/* Brand */}
+        <div className="mb-6">
+          <h3 className="text-white text-lg font-semibold mb-2">NewsDay</h3>
+          <p className="max-w-3xl leading-relaxed">
+            NewsDay is a digital news and media platform providing updates on
+            global news, finance, markets, technology, and current affairs.
+            All content published on this website is for informational and
+            educational purposes only.
           </p>
         </div>
+
+        {/* Risk Disclosure */}
+        <div className="border-t border-gray-700 pt-6 space-y-3 leading-relaxed text-gray-400">
+          <p>
+            <strong className="text-gray-300">Risk Disclosure:</strong> Financial
+            markets, cryptocurrencies, and investment instruments involve
+            significant risk, including the possible loss of capital. Content
+            provided on NewsDay does not constitute investment advice,
+            recommendation, or solicitation.
+          </p>
+
+          <p>
+            Market data, prices, and information shown on this website may not
+            be real-time or fully accurate and can differ from actual market
+            values. NewsDay does not guarantee the accuracy or completeness of
+            any data and shall not be held liable for any loss or damage arising
+            from reliance on the information presented.
+          </p>
+
+          <p>
+            Users are advised to conduct their own research and consult
+            qualified financial professionals before making any trading or
+            investment decisions.
+          </p>
+        </div>
+
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-gray-400">
+            © {new Date().getFullYear()} NewsDay. All rights reserved.
+          </p>
+
+          <div className="flex space-x-5 text-gray-400">
+            <a href="/terms" className="hover:text-white transition">
+              Terms & Conditions
+            </a>
+            <a href="/privacy" className="hover:text-white transition">
+              Privacy Policy
+            </a>
+            <a href="/risk-disclosure" className="hover:text-white transition">
+              Risk Warning
+            </a>
+          </div>
+        </div>
+
       </div>
     </footer>
   );
