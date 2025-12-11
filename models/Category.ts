@@ -6,6 +6,7 @@ export interface ICategory extends Document {
   slug: string;
   parent?: mongoose.Types.ObjectId;
   showInHeader?: boolean;
+  isMainHeader?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +17,7 @@ const CategorySchema = new mongoose.Schema<ICategory>({
   slug: { type: String, required: true, unique: true },
   parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
   showInHeader: { type: Boolean, default: false },
+  isMainHeader: { type: Boolean, default: false },
 }, {
   timestamps: true,
 });

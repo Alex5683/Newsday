@@ -35,22 +35,7 @@ export default function Home() {
               <p className="text-xl md:text-2xl mb-8 text-blue-100">
                 Your trusted source for the latest news and updates
               </p>
-              {!session && (
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <a
-                    href="/register"
-                    className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-                  >
-                    Get Started
-                  </a>
-                  <a
-                    href="/login"
-                    className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
-                  >
-                    Sign In
-                  </a>
-                </div>
-              )}
+
             </div>
           </div>
         </div>

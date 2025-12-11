@@ -48,6 +48,7 @@ interface Category {
     name: string;
   } | string;
   showInHeader?: boolean;
+  isMainHeader?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -57,6 +58,17 @@ interface EditingCategory {
   name: string;
   description: string;
   showInHeader?: boolean;
+  isMainHeader?: boolean;
+}
+
+interface NavItem {
+  _id: string;
+  name: string;
+  href: string;
+  order: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function AdminDashboard() {
@@ -71,7 +83,9 @@ export default function AdminDashboard() {
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
   const [newCategoryParent, setNewCategoryParent] = useState('');
   const [editingCategory, setEditingCategory] = useState<EditingCategory | null>(null);
-  const [activeSection, setActiveSection] = useState<'dashboard' | 'profile' | 'category' | 'quick-actions' | 'recent-activity' | 'alerts-feed'>('dashboard');
+  const [navItems, setNavItems] = useState<NavItem[]>([]);
+  const [newCategoryIsMainHeader, setNewCategoryIsMainHeader] = useState(false);
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'profile' | 'category' | 'quick-actions' | 'recent-activity' | 'users' | 'alerts-feed'>('dashboard');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -84,6 +98,7 @@ export default function AdminDashboard() {
     fetchStats();
     fetchUsers();
     fetchCategories();
+    fetchNavItems();
   }, [session, status, router]);
 
   const fetchStats = async () => {
@@ -166,7 +181,19 @@ export default function AdminDashboard() {
     }
   };
 
-  const createCategory = async (showInHeader: boolean = false) => {
+  const fetchNavItems = async () => {
+    try {
+      const response = await fetch('/api/admin/nav');
+      if (response.ok) {
+        const data = await response.json();
+        setNavItems(data.navItems);
+      }
+    } catch (error) {
+      console.error('Error fetching nav items:', error);
+    }
+  };
+
+  const createCategory = async (showInHeader: boolean = false, isMainHeader: boolean = false) => {
     if (!newCategoryName.trim()) {
       setError('Category name is required');
       return;
@@ -183,6 +210,7 @@ export default function AdminDashboard() {
           description: newCategoryDescription.trim(),
           parent: newCategoryParent || undefined,
           showInHeader,
+          isMainHeader,
         }),
       });
 
@@ -190,9 +218,12 @@ export default function AdminDashboard() {
         setNewCategoryName('');
         setNewCategoryDescription('');
         setNewCategoryParent('');
-        // Reset checkbox
-        const checkbox = document.getElementById('newShowInHeader') as HTMLInputElement;
-        if (checkbox) checkbox.checked = false;
+        // Reset checkboxes
+        const showHeaderCheckbox = document.getElementById('newShowInHeader') as HTMLInputElement;
+        const mainHeaderCheckbox = document.getElementById('newIsMainHeader') as HTMLInputElement;
+        if (showHeaderCheckbox) showHeaderCheckbox.checked = false;
+        if (mainHeaderCheckbox) mainHeaderCheckbox.checked = false;
+        setNewCategoryIsMainHeader(false);
         fetchCategories(); // Refresh categories
       } else {
         const data = await response.json();
@@ -274,6 +305,30 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error('Error updating header visibility:', error);
       setError('Failed to update header visibility');
+    }
+  };
+
+  const toggleMainHeaderSelection = async (categoryId: string, currentIsMainHeader: boolean) => {
+    try {
+      const response = await fetch(`/api/admin/categories/${categoryId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          isMainHeader: !currentIsMainHeader,
+        }),
+      });
+
+      if (response.ok) {
+        fetchCategories(); // Refresh categories
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Failed to update main header selection');
+      }
+    } catch (error) {
+      console.error('Error updating main header selection:', error);
+      setError('Failed to update main header selection');
     }
   };
 
@@ -375,6 +430,19 @@ export default function AdminDashboard() {
               </li>
               <li>
                 <button
+                  onClick={() => setActiveSection('users')}
+                  className={`w-full flex items-center px-4 py-2 text-left rounded-md ${
+                    activeSection === 'users'
+                      ? 'bg-gray-100 text-black'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-black'
+                  }`}
+                >
+                  <Users className="h-5 w-5 mr-3" />
+                  Users
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => setActiveSection('alerts-feed')}
                   className={`w-full flex items-center px-4 py-2 text-left rounded-md ${
                     activeSection === 'alerts-feed'
@@ -408,7 +476,7 @@ export default function AdminDashboard() {
 
             {/* Conditional Content */}
             {activeSection === 'dashboard' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 {/* Profile Section */}
                 <div className="lg:col-span-1">
                   <div className="bg-white overflow-hidden shadow rounded-lg p-6">
@@ -427,6 +495,43 @@ export default function AdminDashboard() {
                         {session.user?.role}
                       </span>
                     </div>
+                  </div>
+                </div>
+
+                {/* Stats Section */}
+                <div className="lg:col-span-1">
+                  <div className="bg-white overflow-hidden shadow rounded-lg p-6">
+                    <h2 className="text-xl font-semibold text-gray-900 mb-6">Stats</h2>
+                    {stats ? (
+                      <div className="space-y-4">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Total Users</span>
+                          <span className="text-sm font-medium text-gray-900">{stats.totalUsers}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Admin Users</span>
+                          <span className="text-sm font-medium text-gray-900">{stats.adminUsers}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Regular Users</span>
+                          <span className="text-sm font-medium text-gray-900">{stats.regularUsers}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Recent Users</span>
+                          <span className="text-sm font-medium text-gray-900">{stats.recentUsers}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Google Users</span>
+                          <span className="text-sm font-medium text-gray-900">{stats.googleUsers}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-gray-600">Credential Users</span>
+                          <span className="text-sm font-medium text-gray-900">{stats.credentialUsers}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600">Loading stats...</p>
+                    )}
                   </div>
                 </div>
 
@@ -504,6 +609,177 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 </div>
+
+                {/* Navigation Management */}
+                <div className="bg-white shadow rounded-lg">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Navigation Management</h3>
+
+                    {/* Create Nav Item Form */}
+                    <div className="mb-6">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div>
+                          <label htmlFor="navName" className="block text-sm font-medium text-gray-700">
+                            Nav Item Name
+                          </label>
+                          <input
+                            type="text"
+                            id="navName"
+                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            placeholder="Enter nav item name"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="navHref" className="block text-sm font-medium text-gray-700">
+                            URL/Href
+                          </label>
+                          <input
+                            type="text"
+                            id="navHref"
+                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            placeholder="Enter URL or href"
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="navOrder" className="block text-sm font-medium text-gray-700">
+                            Order
+                          </label>
+                          <input
+                            type="number"
+                            id="navOrder"
+                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            placeholder="0"
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-4 flex items-center">
+                        <input
+                          type="checkbox"
+                          id="newIsActive"
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          defaultChecked
+                        />
+                        <label htmlFor="newIsActive" className="ml-2 block text-sm text-gray-900">
+                          Is Active
+                        </label>
+                      </div>
+                      <div className="mt-4">
+                        <button
+                          onClick={() => {
+                            const name = (document.getElementById('navName') as HTMLInputElement)?.value;
+                            const href = (document.getElementById('navHref') as HTMLInputElement)?.value;
+                            const order = parseInt((document.getElementById('navOrder') as HTMLInputElement)?.value || '0');
+                            const isActive = (document.getElementById('newIsActive') as HTMLInputElement)?.checked;
+
+                            if (!name || !href) {
+                              setError('Name and href are required');
+                              return;
+                            }
+
+                            // TODO: Implement create nav item function
+                            console.log('Create nav item:', { name, href, order, isActive });
+                          }}
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          <FolderPlus className="mr-2 h-4 w-4" />
+                          Create Nav Item
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Nav Items Table */}
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Name
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Href
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Order
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Is Active
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Created
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {navItems.map((navItem) => (
+                            <tr key={navItem._id}>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <input
+                                  type="text"
+                                  value={navItem.name}
+                                  onChange={(e) => {
+                                    // TODO: Implement update nav item function
+                                    console.log('Update nav item name:', navItem._id, e.target.value);
+                                  }}
+                                  className="text-sm font-medium text-gray-900 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
+                                />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <input
+                                  type="text"
+                                  value={navItem.href}
+                                  onChange={(e) => {
+                                    // TODO: Implement update nav item function
+                                    console.log('Update nav item href:', navItem._id, e.target.value);
+                                  }}
+                                  className="text-sm text-gray-500 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
+                                />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <input
+                                  type="number"
+                                  value={navItem.order}
+                                  onChange={(e) => {
+                                    // TODO: Implement update nav item function
+                                    console.log('Update nav item order:', navItem._id, parseInt(e.target.value));
+                                  }}
+                                  className="text-sm text-gray-500 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded w-16"
+                                />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <input
+                                  type="checkbox"
+                                  checked={navItem.isActive}
+                                  onChange={(e) => {
+                                    // TODO: Implement toggle nav item active function
+                                    console.log('Toggle nav item active:', navItem._id, e.target.checked);
+                                  }}
+                                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                />
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {new Date(navItem.createdAt).toLocaleDateString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button
+                                  onClick={() => {
+                                    // TODO: Implement delete nav item function
+                                    console.log('Delete nav item:', navItem._id);
+                                  }}
+                                  className="text-red-600 hover:text-red-900"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -528,9 +804,11 @@ export default function AdminDashboard() {
             )}
 
             {activeSection === 'category' && (
-              <div className="bg-white shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Category Management</h3>
+              <div className="space-y-8">
+                {/* Category Management */}
+                <div className="bg-white shadow rounded-lg">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Category Management</h3>
 
                   {/* Create Category Form */}
                   <div className="mb-6">
@@ -562,21 +840,36 @@ export default function AdminDashboard() {
                         />
                       </div>
                     </div>
-                    <div className="mt-4 flex items-center">
-                      <input
-                        type="checkbox"
-                        id="newShowInHeader"
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor="newShowInHeader" className="ml-2 block text-sm text-gray-900">
-                        Show in Header
-                      </label>
+                    <div className="mt-4 flex items-center gap-6">
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="newShowInHeader"
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="newShowInHeader" className="ml-2 block text-sm text-gray-900">
+                          Show in Header
+                        </label>
+                      </div>
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="newIsMainHeader"
+                          checked={newCategoryIsMainHeader}
+                          onChange={(e) => setNewCategoryIsMainHeader(e.target.checked)}
+                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        />
+                        <label htmlFor="newIsMainHeader" className="ml-2 block text-sm text-gray-900">
+                          Main Header Selection
+                        </label>
+                      </div>
                     </div>
                     <div className="mt-4">
                       <button
                         onClick={() => {
-                          const checkbox = document.getElementById('newShowInHeader') as HTMLInputElement;
-                          createCategory(checkbox?.checked || false);
+                          const showHeaderCheckbox = document.getElementById('newShowInHeader') as HTMLInputElement;
+                          const mainHeaderCheckbox = document.getElementById('newIsMainHeader') as HTMLInputElement;
+                          createCategory(showHeaderCheckbox?.checked || false, mainHeaderCheckbox?.checked || false);
                         }}
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       >
@@ -602,6 +895,9 @@ export default function AdminDashboard() {
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Show in Header
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Main Header
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Created
@@ -642,6 +938,14 @@ export default function AdminDashboard() {
                                 className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                               />
                             </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <input
+                                type="checkbox"
+                                checked={category.isMainHeader || false}
+                                onChange={() => toggleMainHeaderSelection(category._id, category.isMainHeader || false)}
+                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                              />
+                            </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {new Date(category.createdAt).toLocaleDateString()}
                             </td>
@@ -660,6 +964,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
               </div>
+            </div>
             )}
 
             {activeSection === 'quick-actions' && (
@@ -698,6 +1003,51 @@ export default function AdminDashboard() {
                     <div className="w-2 h-2 bg-muted rounded-full"></div>
                     <span className="text-sm text-muted">Changed password</span>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'users' && (
+              <div className="financial-card p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Users Management</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="px-4 py-2 text-left font-semibold text-foreground">Name</th>
+                        <th className="px-4 py-2 text-left font-semibold text-foreground">Email</th>
+                        <th className="px-4 py-2 text-left font-semibold text-foreground">Role</th>
+                        <th className="px-4 py-2 text-left font-semibold text-foreground">Joined</th>
+                        <th className="px-4 py-2 text-left font-semibold text-foreground">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((user) => (
+                        <tr key={user._id} className="border-b border-gray-200 hover:bg-gray-50">
+                          <td className="px-4 py-3 text-muted">{user.name}</td>
+                          <td className="px-4 py-3 text-muted">{user.email}</td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex px-3 py-1 text-xs font-medium rounded-full ${
+                              user.role === 'admin'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-green-100 text-green-800'
+                            }`}>
+                              {user.role}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-muted">{new Date(user.createdAt).toLocaleDateString()}</td>
+                          <td className="px-4 py-3">
+                            <button className="text-blue-600 hover:text-blue-800 mr-2">
+                              <Edit className="h-4 w-4" />
+                            </button>
+                            <button className="text-red-600 hover:text-red-800">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}

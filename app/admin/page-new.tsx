@@ -315,6 +315,19 @@ export default function AdminDashboard() {
               </li>
               <li>
                 <button
+                  onClick={() => setActiveSection('users')}
+                  className={`w-full flex items-center px-4 py-2 text-left rounded-md ${
+                    activeSection === 'users'
+                      ? 'bg-gray-100 text-black'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-black'
+                  }`}
+                >
+                  <Users className="h-5 w-5 mr-3" />
+                  Users
+                </button>
+              </li>
+              <li>
+                <button
                   onClick={() => setActiveSection('alerts-feed')}
                   className={`w-full flex items-center px-4 py-2 text-left rounded-md ${
                     activeSection === 'alerts-feed'
@@ -618,6 +631,84 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {activeSection === 'users' && (
+              <div className="bg-white shadow rounded-lg">
+                <div className="px-4 py-5 sm:p-6">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">User Management</h3>
+
+                  {/* Users Table */}
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Avatar
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Role
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Created
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {users.map((user) => (
+                          <tr key={user._id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm">
+                                {user.image ? (
+                                  <img src={user.image} alt={user.name} className="w-10 h-10 rounded-full" />
+                                ) : (
+                                  user.name.charAt(0).toUpperCase()
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {user.name}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {user.email}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <select
+                                value={user.role}
+                                onChange={(e) => updateUserRole(user._id, e.target.value as 'admin' | 'user')}
+                                className="text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                              >
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                              </select>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {new Date(user.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
+                                onClick={() => deleteUser(user._id)}
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {activeSection === 'alerts-feed' && (
               <div className="financial-card p-6">
                 <h3 className="text-lg font-semibold text-foreground mb-4">Alerts Feed</h3>
@@ -653,12 +744,13 @@ export default function AdminDashboard() {
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-foreground mb-1">Oil Prices Reach 6-Month High</h4>
-                      <p className="text-sm text-muted mb-2">Global supply concerns push crude oil prices to their highest level since March.</p>
-                      <div className="flex items-center gap-4 text-xs text-muted">
-                        <span>6 hours ago</span>
-                        <button className="text-blue-600 hover:text-blue-800">Read More</button>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground mb-1">Oil Prices Reach 6-Month High</h4>
+                        <p className="text-sm text-muted mb-2">Global supply concerns push crude oil prices to their highest level since March.</p>
+                        <div className="flex items-center gap-4 text-xs text-muted">
+                          <span>6 hours ago</span>
+                          <button className="text-blue-600 hover:text-blue-800">Read More</button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -666,12 +758,13 @@ export default function AdminDashboard() {
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-foreground mb-1">Cryptocurrency Market Shows Signs of Recovery</h4>
-                      <p className="text-sm text-muted mb-2">Bitcoin and major altcoins gain momentum as institutional adoption increases.</p>
-                      <div className="flex items-center gap-4 text-xs text-muted">
-                        <span>8 hours ago</span>
-                        <button className="text-blue-600 hover:text-blue-800">Read More</button>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground mb-1">Cryptocurrency Market Shows Signs of Recovery</h4>
+                        <p className="text-sm text-muted mb-2">Bitcoin and major altcoins gain momentum as institutional adoption increases.</p>
+                        <div className="flex items-center gap-4 text-xs text-muted">
+                          <span>8 hours ago</span>
+                          <button className="text-blue-600 hover:text-blue-800">Read More</button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -679,12 +772,13 @@ export default function AdminDashboard() {
                   <div className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start gap-3">
                       <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-foreground mb-1">Trade Tensions Escalate Between Major Economies</h4>
-                      <p className="text-sm text-muted mb-2">New tariffs announced, potentially impacting global supply chains and market stability.</p>
-                      <div className="flex items-center gap-4 text-xs text-muted">
-                        <span>12 hours ago</span>
-                        <button className="text-blue-600 hover:text-blue-800">Read More</button>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground mb-1">Trade Tensions Escalate Between Major Economies</h4>
+                        <p className="text-sm text-muted mb-2">New tariffs announced, potentially impacting global supply chains and market stability.</p>
+                        <div className="flex items-center gap-4 text-xs text-muted">
+                          <span>12 hours ago</span>
+                          <button className="text-blue-600 hover:text-blue-800">Read More</button>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, description, parent, showInHeader } = await request.json();
+    const { name, description, parent, showInHeader, isMainHeader } = await request.json();
 
     if (!name || !name.trim()) {
       return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
       slug,
       parent: parent || undefined,
       showInHeader: showInHeader || false,
+      isMainHeader: isMainHeader || false,
     });
 
     await category.save();

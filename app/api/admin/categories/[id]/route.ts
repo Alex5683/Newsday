@@ -15,7 +15,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, description, parent, showInHeader } = await request.json();
+    const { name, description, parent, showInHeader, isMainHeader } = await request.json();
 
     await dbConnect();
 
@@ -28,6 +28,11 @@ export async function PUT(
     // Update showInHeader if provided
     if (showInHeader !== undefined) {
       category.showInHeader = showInHeader;
+    }
+
+    // Update isMainHeader if provided
+    if (isMainHeader !== undefined) {
+      category.isMainHeader = isMainHeader;
     }
 
     // Update name if provided

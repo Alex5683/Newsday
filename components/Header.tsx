@@ -10,18 +10,31 @@ interface Category {
   _id: string;
   name: string;
   slug: string;
+  showInHeader?: boolean;
+  isMainHeader?: boolean;
+}
+
+interface NavItem {
+  _id: string;
+  name: string;
+  href: string;
+  order: number;
+  isActive: boolean;
 }
 
 export default function Header() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [headerCategories, setHeaderCategories] = useState<Category[]>([]);
+  const [subHeaderCategories, setSubHeaderCategories] = useState<Category[]>([]);
+  const [navItems, setNavItems] = useState<NavItem[]>([]);
+  const [showSubNav, setShowSubNav] = useState(true);
   const { data: session } = useSession();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch header categories
+  // Fetch header categories and nav items
   useEffect(() => {
-    async function fetchHeaderCategories() {
+    async function fetchMainHeaderCategories() {
       try {
         const response = await fetch('/api/categories/header');
         if (response.ok) {
@@ -29,15 +42,45 @@ export default function Header() {
           setHeaderCategories(data);
         }
       } catch (error) {
-        console.error('Failed to fetch header categories:', error);
+        console.error('Failed to fetch main header categories:', error);
+      }
+    }
+
+    async function fetchSubHeaderCategories() {
+      try {
+        const response = await fetch('/api/categories/subheader');
+        if (response.ok) {
+          const data = await response.json();
+          setSubHeaderCategories(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch sub header categories:', error);
+      }
+    }
+
+    async function fetchNavItems() {
+      try {
+        const response = await fetch('/api/admin/nav');
+        if (response.ok) {
+          const data = await response.json();
+          setNavItems(data.navItems);
+        }
+      } catch (error) {
+        console.error('Failed to fetch nav items:', error);
       }
     }
 
     // Fetch immediately on mount
-    fetchHeaderCategories();
+    fetchMainHeaderCategories();
+    fetchSubHeaderCategories();
+    fetchNavItems();
 
     // Set up interval to fetch every 10 seconds
-    const interval = setInterval(fetchHeaderCategories, 10000);
+    const interval = setInterval(() => {
+      fetchMainHeaderCategories();
+      fetchSubHeaderCategories();
+      fetchNavItems();
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
@@ -61,7 +104,7 @@ export default function Header() {
         {/* TOP HEADER */}
         <div className="bg-[#1c1c1c] border-b border-white/10">
           <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            
+
             {/* Logo */}
             <Link href="/" className="text-xl font-bold text-white">
               NewsDay
@@ -170,24 +213,13 @@ export default function Header() {
         {/* MAIN NAV */}
         <div className="bg-[#151515] border-b border-white/10">
           <div className="max-w-7xl mx-auto px-4 py-2 overflow-x-auto">
-            <nav className="flex gap-6 text-sm whitespace-nowrap text-gray-300">
-              <Link href="#" className="hover:text-yellow-400">Markets</Link>
-              <Link href="#" className="hover:text-yellow-400">Watchlist</Link>
-              <Link href="#" className="hover:text-yellow-400">News</Link>
-              <Link href="#" className="hover:text-yellow-400">Analysis</Link>
-              <Link href="#" className="hover:text-yellow-400">Charts</Link>
-              <Link href="#" className="hover:text-yellow-400">Technical</Link>
-              <Link href="#" className="hover:text-yellow-400">Tools</Link>
-              <Link href="#" className="hover:text-yellow-400">Academy</Link>
-              <Link href="#" className="hover:text-yellow-400">Economic Calendar</Link>
-            </nav>
-          </div>
-        </div>
-
-        {/* SUB NAV */}
-        <div className="bg-[#101010] border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-4 py-2 overflow-x-auto">
-            <nav className="flex gap-5 text-xs whitespace-nowrap text-gray-400">
+            <nav className="flex gap-6 text-sm whitespace-nowrap text-gray-300 items-center">
+              <input
+                type="checkbox"
+                checked={showSubNav}
+                onChange={(e) => setShowSubNav(e.target.checked)}
+                className="h-4 w-4 text-yellow-400 focus:ring-yellow-400 border-gray-300 rounded"
+              />
               {headerCategories.map(category => (
                 <Link
                   key={category._id}
@@ -200,6 +232,25 @@ export default function Header() {
             </nav>
           </div>
         </div>
+
+        {/* SUB NAV */}
+        {showSubNav && (
+          <div className="bg-[#101010] border-b border-white/10">
+            <div className="max-w-7xl mx-auto px-4 py-2 overflow-x-auto">
+              <nav className="flex gap-5 text-xs whitespace-nowrap text-gray-400">
+                {subHeaderCategories.map(category => (
+                  <Link
+                    key={category._id}
+                    href={`/category/${category.slug}`}
+                    className="hover:text-yellow-400"
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* AUTH MODAL */}

@@ -42,7 +42,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authConfig);
@@ -53,7 +53,8 @@ export async function DELETE(
 
     await dbConnect();
 
-    const user = await User.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const user = await User.findByIdAndDelete(id);
 
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
