@@ -9,12 +9,13 @@ import Tag from '@/models/Tag';
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await dbConnect();
 
-    const tag = await Tag.findById(params.id);
+    const tag = await Tag.findById(id);
 
     if (!tag) {
       return NextResponse.json(
@@ -38,9 +39,10 @@ export async function GET(
  */
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authConfig);
 
     if (!session?.user || session.user.role !== 'admin') {
@@ -52,7 +54,7 @@ export async function PUT(
 
     await dbConnect();
 
-    const tag = await Tag.findById(params.id);
+    const tag = await Tag.findById(id);
     if (!tag) {
       return NextResponse.json(
         { success: false, error: 'Tag not found' },
@@ -75,7 +77,7 @@ export async function PUT(
     }
 
     if (slug && slug !== tag.slug) {
-      const existing = await Tag.findOne({ slug, _id: { $ne: params.id } });
+      const existing = await Tag.findOne({ slug, _id: { $ne: id } });
       if (existing) {
         return NextResponse.json(
           { success: false, error: 'Slug already exists' },
@@ -105,9 +107,10 @@ export async function PUT(
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authConfig);
 
     if (!session?.user || session.user.role !== 'admin') {
@@ -119,7 +122,7 @@ export async function DELETE(
 
     await dbConnect();
 
-    const tag = await Tag.findByIdAndDelete(params.id);
+    const tag = await Tag.findByIdAndDelete(id);
 
     if (!tag) {
       return NextResponse.json(

@@ -5,7 +5,7 @@ import dbConnect from '@/lib/mongodb';
 import Post from '@/models/Post';
 import Category from '@/models/Category';
 import Tag from '@/models/Tag';
-import { generateSlug, validateSEO } from '@/lib/cms-utils';
+import { generateSlug, validateSEO } from '@/lib/cms-utils-client';
 
 /**
  * GET /api/cms/posts - List posts with search, filters, and pagination

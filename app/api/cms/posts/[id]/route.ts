@@ -5,19 +5,20 @@ import dbConnect from '@/lib/mongodb';
 import Post from '@/models/Post';
 import Category from '@/models/Category';
 import Tag from '@/models/Tag';
-import { generateSlug, validateSEO } from '@/lib/cms-utils';
+import { generateSlug, validateSEO } from '@/lib/cms-utils-client';
 
 /**
  * GET /api/cms/posts/[id] - Get a single post
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await dbConnect();
 
-    const post = await Post.findById(params.id)
+    const post = await Post.findById(id)
       .populate('category', 'name slug')
       .populate('tags', 'name slug')
       .populate('author', 'name email');
@@ -50,9 +51,10 @@ export async function GET(
  */
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authConfig);
 
     if (!session?.user || session.user.role !== 'admin') {
@@ -64,7 +66,7 @@ export async function PUT(
 
     await dbConnect();
 
-    const post = await Post.findById(params.id);
+    const post = await Post.findById(id);
     if (!post) {
       return NextResponse.json(
         { success: false, error: 'Post not found' },
@@ -98,7 +100,7 @@ export async function PUT(
 
     // Handle slug update
     if (providedSlug && providedSlug !== post.slug) {
-      const existingPost = await Post.findOne({ slug: providedSlug, _id: { $ne: params.id } });
+      const existingPost = await Post.findOne({ slug: providedSlug, _id: { $ne: id } });
       if (existingPost) {
         return NextResponse.json(
           { success: false, error: 'Slug already exists' },
@@ -169,9 +171,10 @@ export async function PUT(
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authConfig);
 
     if (!session?.user || session.user.role !== 'admin') {
@@ -183,7 +186,7 @@ export async function DELETE(
 
     await dbConnect();
 
-    const post = await Post.findByIdAndDelete(params.id);
+    const post = await Post.findByIdAndDelete(id);
 
     if (!post) {
       return NextResponse.json(

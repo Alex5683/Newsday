@@ -18,6 +18,7 @@ import {
   Bell,
   TrendingUp,
   LogOut,
+  BookOpen,
 } from 'lucide-react';
 
 interface User {
@@ -85,7 +86,7 @@ export default function AdminDashboard() {
   const [editingCategory, setEditingCategory] = useState<EditingCategory | null>(null);
   const [navItems, setNavItems] = useState<NavItem[]>([]);
   const [newCategoryIsMainHeader, setNewCategoryIsMainHeader] = useState(false);
-  const [activeSection, setActiveSection] = useState<'dashboard' | 'profile' | 'category' | 'quick-actions' | 'recent-activity' | 'users' | 'alerts-feed'>('dashboard');
+  const [activeSection, setActiveSection] = useState<'dashboard' | 'profile' | 'category' | 'quick-actions' | 'recent-activity' | 'users' | 'alerts-feed' | 'blog'>('dashboard');
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -452,6 +453,19 @@ export default function AdminDashboard() {
                 >
                   <TrendingUp className="h-5 w-5 mr-3" />
                   Alerts Feed
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => setActiveSection('blog')}
+                  className={`w-full flex items-center px-4 py-2 text-left rounded-md ${
+                    activeSection === 'blog'
+                      ? 'bg-gray-100 text-black'
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-black'
+                  }`}
+                >
+                  <BookOpen className="h-5 w-5 mr-3" />
+                  Blog
                 </button>
               </li>
             </ul>
@@ -1124,6 +1138,99 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeSection === 'blog' && (
+              <div className="space-y-8">
+                <div className="bg-white shadow rounded-lg p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">Blog Management</h2>
+                    <button
+                      onClick={() => {
+                        window.location.href = '/admin/cms/posts/create';
+                      }}
+                      className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                    >
+                      <FolderPlus className="h-5 w-5" />
+                      Create Post
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <h3 className="font-semibold text-gray-900 mb-2">Posts</h3>
+                      <p className="text-2xl font-bold text-indigo-600">0</p>
+                      <p className="text-sm text-gray-600">Total published posts</p>
+                      <button
+                        onClick={() => {
+                          window.location.href = '/admin/cms/posts';
+                        }}
+                        className="mt-3 text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                      >
+                        View All →
+                      </button>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <h3 className="font-semibold text-gray-900 mb-2">Categories</h3>
+                      <p className="text-2xl font-bold text-green-600">0</p>
+                      <p className="text-sm text-gray-600">Total categories</p>
+                      <button
+                        onClick={() => {
+                          window.location.href = '/admin/cms/categories';
+                        }}
+                        className="mt-3 text-green-600 hover:text-green-900 text-sm font-medium"
+                      >
+                        Manage →
+                      </button>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                      <h3 className="font-semibold text-gray-900 mb-2">Tags</h3>
+                      <p className="text-2xl font-bold text-purple-600">0</p>
+                      <p className="text-sm text-gray-600">Total tags</p>
+                      <button
+                        onClick={() => {
+                          window.location.href = '/admin/cms/tags';
+                        }}
+                        className="mt-3 text-purple-600 hover:text-purple-900 text-sm font-medium"
+                      >
+                        Manage →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white shadow rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Links</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a
+                      href="/admin/cms/posts"
+                      className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <h4 className="font-medium text-gray-900 mb-1">Manage Posts</h4>
+                      <p className="text-sm text-gray-600">View, edit, and delete blog posts</p>
+                    </a>
+                    <a
+                      href="/admin/cms/posts/create"
+                      className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <h4 className="font-medium text-gray-900 mb-1">Create New Post</h4>
+                      <p className="text-sm text-gray-600">Write and publish a new blog post</p>
+                    </a>
+                    <a
+                      href="/admin/cms/categories"
+                      className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <h4 className="font-medium text-gray-900 mb-1">Categories</h4>
+                      <p className="text-sm text-gray-600">Organize posts into categories</p>
+                    </a>
+                    <a
+                      href="/admin/cms/tags"
+                      className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <h4 className="font-medium text-gray-900 mb-1">Tags</h4>
+                      <p className="text-sm text-gray-600">Manage blog tags and keywords</p>
+                    </a>
                   </div>
                 </div>
               </div>

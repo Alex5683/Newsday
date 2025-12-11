@@ -6,9 +6,10 @@ import User from '@/models/User';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authConfig);
 
     if (!session || session.user?.role !== 'admin') {
@@ -24,7 +25,7 @@ export async function PUT(
     await dbConnect();
 
     const user = await User.findByIdAndUpdate(
-      params.id,
+      id,
       { role },
       { new: true, select: '-password' }
     );

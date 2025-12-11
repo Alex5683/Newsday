@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { formatDate } from '@/lib/cms-utils';
+import { formatDate } from '@/lib/cms-utils-client';
 import { Pagination } from '@/components/CMS/CmsComponents';
 import { ArrowLeft } from 'lucide-react';
 
@@ -160,7 +160,7 @@ export default function TagBlogPage({ params }: TagBlogPageProps) {
                         className="w-full h-full object-cover hover:scale-105 transition"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600" />
+                      <div className="w-full h-full bg-linear-to-br from-blue-400 to-blue-600" />
                     )}
                   </div>
                   <div className="p-4">

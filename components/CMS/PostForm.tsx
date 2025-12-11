@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { generateSlug } from '@/lib/cms-utils';
+import { generateSlug } from '@/lib/cms-utils-client';
 
 const postSchema = z.object({
   title: z.string().min(1, 'Title is required').min(5, 'Title must be at least 5 characters'),

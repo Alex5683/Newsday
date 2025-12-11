@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { formatDate } from '@/lib/cms-utils';
+import { formatDate } from '@/lib/cms-utils-client';
 import { Eye, Calendar, User, Tag, FolderOpen } from 'lucide-react';
 
 interface BlogPostPageProps {
@@ -18,9 +18,9 @@ interface Post {
   content: string;
   excerpt: string;
   coverImage?: string;
-  category: { name: string; slug: string };
-  tags: { name: string; slug: string }[];
-  author: { name: string; email?: string };
+  category: { _id: string; name: string; slug: string };
+  tags: { _id: string; name: string; slug: string }[];
+  author: { _id?: string; name: string; email?: string };
   status: string;
   views: number;
   createdAt: string;
@@ -200,7 +200,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600" />
+                      <div className="w-full h-full bg-linear-to-br from-blue-400 to-blue-600" />
                     )}
                   </div>
                   <div className="p-4">

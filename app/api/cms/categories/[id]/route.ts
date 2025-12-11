@@ -9,12 +9,13 @@ import Category from '@/models/Category';
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     await dbConnect();
 
-    const category = await Category.findById(params.id).populate('parent', 'name slug');
+    const category = await Category.findById(id).populate('parent', 'name slug');
 
     if (!category) {
       return NextResponse.json(
@@ -38,9 +39,10 @@ export async function GET(
  */
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authConfig);
 
     if (!session?.user || session.user.role !== 'admin') {
@@ -52,7 +54,7 @@ export async function PUT(
 
     await dbConnect();
 
-    const category = await Category.findById(params.id);
+    const category = await Category.findById(id);
     if (!category) {
       return NextResponse.json(
         { success: false, error: 'Category not found' },
@@ -75,7 +77,7 @@ export async function PUT(
     }
 
     if (slug && slug !== category.slug) {
-      const existing = await Category.findOne({ slug, _id: { $ne: params.id } });
+      const existing = await Category.findOne({ slug, _id: { $ne: id } });
       if (existing) {
         return NextResponse.json(
           { success: false, error: 'Slug already exists' },
@@ -108,9 +110,10 @@ export async function PUT(
  */
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const session = await getServerSession(authConfig);
 
     if (!session?.user || session.user.role !== 'admin') {
@@ -122,7 +125,7 @@ export async function DELETE(
 
     await dbConnect();
 
-    const category = await Category.findByIdAndDelete(params.id);
+    const category = await Category.findByIdAndDelete(id);
 
     if (!category) {
       return NextResponse.json(
