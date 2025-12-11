@@ -5,6 +5,7 @@ import dbConnect from '@/lib/mongodb';
 import Post from '@/models/Post';
 import Category from '@/models/Category';
 import Tag from '@/models/Tag';
+import User from '@/models/User';
 import { generateSlug, validateSEO } from '@/lib/cms-utils-client';
 
 /**
@@ -158,6 +159,17 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Get or create admin user for author field
+    let author = await User.findOne({ role: 'admin' });
+    if (!author) {
+      // Create default admin user if none exists
+      author = await User.create({
+        name: 'Admin',
+        email: 'admin@newsday.local',
+        role: 'admin',
+      });
+    }
+
     // Create post
     const post = new Post({
       title,
@@ -167,7 +179,7 @@ export async function POST(req: NextRequest) {
       coverImage,
       category,
       tags,
-      author: (session.user as any).id,
+      author: author._id,
       status,
       seo,
       publishedAt: status === 'published' ? new Date() : null,
@@ -182,10 +194,11 @@ export async function POST(req: NextRequest) {
       { success: true, data: post },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating post:', error);
+    const errorMessage = error?.message || 'Failed to create post';
     return NextResponse.json(
-      { success: false, error: 'Failed to create post' },
+      { success: false, error: errorMessage },
       { status: 500 }
     );
   }
