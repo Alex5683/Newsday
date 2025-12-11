@@ -4,7 +4,7 @@ import React, { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { PostForm } from '@/components/CMS/PostForm';
+import AdminPostForm from '@/components/CMS/AdminPostForm';
 
 export default function CreatePostPage() {
   const { data: session, status } = useSession();
@@ -55,21 +55,21 @@ export default function CreatePostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50 w-full">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Create New Post</h1>
           <p className="text-gray-600 mt-2">Add a new post to your blog</p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-              {error}
-            </div>
-          )}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 max-w-7xl mx-auto">
+            {error}
+          </div>
+        )}
 
-          <PostForm onSubmit={handleSubmit} isLoading={isLoading} />
+        <div className="w-full">
+          <AdminPostForm />
         </div>
       </div>
     </div>

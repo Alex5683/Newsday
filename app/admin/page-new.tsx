@@ -485,107 +485,123 @@ export default function AdminDashboard() {
                 <div className="px-4 py-5 sm:p-6">
                   <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Category Management</h3>
 
-                  {/* Create Category Form */}
-                  <div className="mb-6">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700">
-                          Category Name
-                        </label>
-                        <input
-                          type="text"
-                          id="categoryName"
-                          value={newCategoryName}
-                          onChange={(e) => setNewCategoryName(e.target.value)}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                          placeholder="Enter category name"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="categoryDescription" className="block text-sm font-medium text-gray-700">
-                          Description (Optional)
-                        </label>
-                        <input
-                          type="text"
-                          id="categoryDescription"
-                          value={newCategoryDescription}
-                          onChange={(e) => setNewCategoryDescription(e.target.value)}
-                          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                          placeholder="Enter description"
-                        />
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <button
-                        onClick={createCategory}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                      >
-                        <FolderPlus className="mr-2 h-4 w-4" />
-                        Create Category
-                      </button>
-                    </div>
-                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Left: Fields/Form */}
+                    <div className="bg-white overflow-hidden shadow rounded-lg p-6">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Create Category</h3>
 
-                  {/* Categories Table */}
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Description
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Slug
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Created
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {categories.map((category) => (
-                          <tr key={category._id}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="text"
-                                value={category.name}
-                                onChange={(e) => updateCategory(category._id, e.target.value, category.description || '')}
-                                className="text-sm font-medium text-gray-900 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="text"
-                                value={category.description || ''}
-                                onChange={(e) => updateCategory(category._id, category.name, e.target.value)}
-                                className="text-sm text-gray-500 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
-                                placeholder="No description"
-                              />
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {category.slug}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {new Date(category.createdAt).toLocaleDateString()}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => deleteCategory(category._id)}
-                                className="text-red-600 hover:text-red-900"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                      <div className="space-y-4">
+                        <div>
+                          <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700">
+                            Category Name
+                          </label>
+                          <input
+                            type="text"
+                            id="categoryName"
+                            value={newCategoryName}
+                            onChange={(e) => setNewCategoryName(e.target.value)}
+                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            placeholder="Enter category name"
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="categoryDescription" className="block text-sm font-medium text-gray-700">
+                            Description (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            id="categoryDescription"
+                            value={newCategoryDescription}
+                            onChange={(e) => setNewCategoryDescription(e.target.value)}
+                            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            placeholder="Enter description"
+                          />
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={createCategory}
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                          >
+                            <FolderPlus className="mr-2 h-4 w-4" />
+                            Create Category
+                          </button>
+
+                          <button
+                            onClick={() => { setNewCategoryName(''); setNewCategoryDescription(''); }}
+                            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                          >
+                            Reset
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right: Categories Table / Content */}
+                    <div className="bg-white overflow-hidden shadow rounded-lg p-6">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Categories</h3>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Name
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Description
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Slug
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Created
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {categories.map((category) => (
+                              <tr key={category._id}>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <input
+                                    type="text"
+                                    value={category.name}
+                                    onChange={(e) => updateCategory(category._id, e.target.value, category.description || '')}
+                                    className="text-sm font-medium text-gray-900 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
+                                  />
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <input
+                                    type="text"
+                                    value={category.description || ''}
+                                    onChange={(e) => updateCategory(category._id, category.name, e.target.value)}
+                                    className="text-sm text-gray-500 border-none bg-transparent focus:ring-0 focus:outline-none focus:bg-gray-50 px-2 py-1 rounded"
+                                    placeholder="No description"
+                                  />
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {category.slug}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {new Date(category.createdAt).toLocaleDateString()}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                  <button
+                                    onClick={() => deleteCategory(category._id)}
+                                    className="text-red-600 hover:text-red-900"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
