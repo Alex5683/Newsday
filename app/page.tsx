@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
+import MarketTable from '../components/MarketTable';
+
 export default function Home() {
   const { data: session, status } = useSession();
 
@@ -38,6 +40,11 @@ export default function Home() {
 
             </div>
           </div>
+        </div>
+
+        {/* Market Table (added component) */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <MarketTable />
         </div>
 
         {/* Content Section */}
