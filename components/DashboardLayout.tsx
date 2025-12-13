@@ -19,6 +19,7 @@ export default function DashboardLayout({ children }: SidebarProps) {
     { icon: Home, label: 'Dashboard', href: '/admin' },
     { icon: FileText, label: 'Posts', href: '/admin/cms/posts' },
     { icon: Folder, label: 'Categories', href: '/admin/cms/categories' },
+    { icon: Folder, label: 'Market-Lists', href: '/admin/market-lists' },
     { icon: Users, label: 'Users', href: '/admin/users' },
     { icon: Settings, label: 'Settings', href: '/admin/settings' },
   ];
