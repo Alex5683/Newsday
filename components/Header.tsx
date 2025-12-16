@@ -241,7 +241,7 @@ export default function Header() {
                 {subHeaderCategories.map(category => (
                   <Link
                     key={category._id}
-                    href={`/category/${category.slug}`}
+                    href={`/blog/category/${category.slug}`}
                     className="hover:text-yellow-400"
                   >
                     {category.name}

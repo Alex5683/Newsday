@@ -1,46 +1,24 @@
 'use client';
 
+
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/cms-utils-client';
 import { Pagination } from '@/components/CMS/CmsComponents';
 import { ArrowLeft } from 'lucide-react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
-interface CategoryBlogPageProps {
-  params: {
-    slug: string;
-  };
-}
 
-interface Post {
-  _id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  coverImage?: string;
-  category: { name: string; slug: string };
-  author: { name: string };
-  createdAt: string;
-  views: number;
-}
+import { useParams } from 'next/navigation';
 
-interface Category {
-  name: string;
-  description?: string;
-}
-
-interface PaginationData {
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
-}
-
-export default function CategoryBlogPage({ params }: CategoryBlogPageProps) {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [category, setCategory] = useState<Category | null>(null);
+export default function CategoryBlogPage() {
+  const params = useParams();
+  const slug = params.slug as string;
+  const [posts, setPosts] = useState<any[]>([]);
+  const [category, setCategory] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState<PaginationData>({
+  const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
     limit: 12,
@@ -48,76 +26,55 @@ export default function CategoryBlogPage({ params }: CategoryBlogPageProps) {
   });
 
   useEffect(() => {
-    fetchCategoryAndPosts();
-  }, [params.slug, pagination.page]);
-
-  const fetchCategoryAndPosts = async () => {
-    try {
-      setLoading(true);
-
-      // Get category by slug
-      const categoriesRes = await fetch('/api/cms/categories');
-      const categoriesData = await categoriesRes.json();
-      const foundCategory = categoriesData.data?.find(
-        (cat: any) => cat.slug === params.slug
-      );
-
-      if (foundCategory) {
-        setCategory(foundCategory);
-
-        // Get posts for this category
-        const params_obj = new URLSearchParams();
-        params_obj.append('page', pagination.page.toString());
-        params_obj.append('limit', pagination.limit.toString());
-        params_obj.append('category', foundCategory._id);
-        params_obj.append('status', 'published');
-
-        const postsRes = await fetch(`/api/cms/posts?${params_obj}`);
-        const postsData = await postsRes.json();
-
-        if (postsData.success) {
-          setPosts(postsData.data);
-          setPagination(postsData.pagination);
+    const fetchCategoryAndPosts = async () => {
+      try {
+        setLoading(true);
+        const categoriesRes = await fetch('/api/cms/categories');
+        const categoriesData = await categoriesRes.json();
+        const foundCategory = categoriesData.data?.find((cat: any) => cat.slug === slug);
+        if (foundCategory) {
+          setCategory(foundCategory);
+          const params_obj = new URLSearchParams();
+          params_obj.append('page', pagination.page.toString());
+          params_obj.append('limit', pagination.limit.toString());
+          params_obj.append('category', foundCategory.slug);
+          params_obj.append('status', 'published');
+          const postsRes = await fetch(`/api/cms/posts?${params_obj}`);
+          const postsData = await postsRes.json();
+          if (postsData.success) {
+            setPosts(postsData.data);
+            setPagination(postsData.pagination);
+          }
         }
+      } catch (error) {
+        console.error('Error fetching category:', error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching category:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    fetchCategoryAndPosts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug, pagination.page]);
 
   const handlePageChange = (page: number) => {
     setPagination({ ...pagination, page });
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
-      </div>
-    );
+    return <><Header /><div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-xl text-gray-600">Loading...</div></div><Footer /></>;
   }
 
   if (!category) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Category Not Found</h1>
-          <Link href="/blog" className="text-blue-600 hover:underline inline-flex items-center gap-2">
-            <ArrowLeft size={16} />
-            Back to Blog
-          </Link>
-        </div>
-      </div>
-    );
+    return <><Header /><div className="min-h-screen bg-gray-50"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center"><h1 className="text-2xl font-bold text-gray-900 mb-4">Category Not Found</h1><Link href="/blog" className="text-blue-600 hover:underline inline-flex items-center gap-2"><ArrowLeft size={16} />Back to Blog</Link></div></div><Footer /></>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
-        <div className="mb-12">
+    <>
+      <Header />
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Header */}
+          <div className="mb-12">
           <Link href="/blog" className="text-blue-600 hover:underline inline-flex items-center gap-2 mb-4">
             <ArrowLeft size={16} />
             Back to Blog
@@ -142,7 +99,7 @@ export default function CategoryBlogPage({ params }: CategoryBlogPageProps) {
               {posts.map((post) => (
                 <Link
                   key={post._id}
-                  href={`/blog/${post.slug}`}
+                  href={`/blog/${category.slug}/${post.slug}`}
                   className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
                 >
                   <div className="aspect-video bg-gray-200 overflow-hidden">
@@ -182,6 +139,8 @@ export default function CategoryBlogPage({ params }: CategoryBlogPageProps) {
           </>
         )}
       </div>
-    </div>
-  );
+        </div>
+        <Footer />
+      </>
+    );
 }

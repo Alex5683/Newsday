@@ -22,6 +22,7 @@ export interface IPost extends Document {
   createdAt: Date;
   updatedAt: Date;
   publishedAt?: Date;
+  trending?: boolean;
 }
 
 const PostSchema = new mongoose.Schema<IPost>({
@@ -41,6 +42,7 @@ const PostSchema = new mongoose.Schema<IPost>({
     slugOverride: { type: String },
   },
   views: { type: Number, default: 0 },
+  trending: { type: Boolean, default: false },
   publishedAt: { type: Date },
 }, {
   timestamps: true,

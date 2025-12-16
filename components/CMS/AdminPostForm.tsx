@@ -34,6 +34,7 @@ export default function AdminPostForm({ initialPost, postId }: AdminPostFormProp
   const [tags, setTags] = useState<string[]>(initialPost?.tags?.map((t) => t._id) || []); // store MongoDB _ids
   const [excerpt, setExcerpt] = useState(initialPost?.excerpt || '');
   const [content, setContent] = useState(initialPost?.content || '');
+  const [trending, setTrending] = useState(initialPost?.trending || false);
 
   // data fetching
   const [categories, setCategories] = useState<CategoryOption[]>([]);
@@ -138,6 +139,7 @@ export default function AdminPostForm({ initialPost, postId }: AdminPostFormProp
       tags: tags.filter(Boolean), // Array of MongoDB ObjectIds
       excerpt: excerpt.trim() || undefined,
       content: content.trim(),
+      trending,
     };
 
     const payloadStr = JSON.stringify(toSave);
@@ -376,6 +378,19 @@ export default function AdminPostForm({ initialPost, postId }: AdminPostFormProp
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Trending */}
+            <div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={trending}
+                  onChange={() => setTrending((v) => !v)}
+                  className="rounded border-gray-300 cursor-pointer"
+                />
+                <span className="text-sm text-gray-700">Trending Post</span>
+              </label>
             </div>
 
             {/* Excerpt */}

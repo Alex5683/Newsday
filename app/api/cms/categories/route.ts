@@ -21,8 +21,11 @@ export async function GET(req: NextRequest) {
     }
 
     const categories = await query.lean();
-
-    return NextResponse.json({ success: true, data: categories });
+    // Ensure plain JSON response, not wrapped in Content property
+    return new NextResponse(JSON.stringify({ success: true, data: categories }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
   } catch (error) {
     console.error('Error fetching categories:', error);
     return NextResponse.json(

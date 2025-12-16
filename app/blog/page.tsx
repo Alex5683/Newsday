@@ -108,7 +108,7 @@ export default function BlogPage() {
               {posts.map((post) => (
                 <Link
                   key={post._id}
-                  href={`/blog/${post.slug}`}
+                  href={`/blog/${post.category.slug}/${post.slug}`}
                   className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
                 >
                   <div className="aspect-video bg-gray-200 overflow-hidden">

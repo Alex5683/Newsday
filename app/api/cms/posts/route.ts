@@ -19,10 +19,11 @@ export async function GET(req: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
-    const category = searchParams.get('category') || '';
+    const categorySlug = searchParams.get('category') || '';
     const tags = searchParams.get('tags')?.split(',') || [];
     const status = searchParams.get('status') || '';
     const sortBy = searchParams.get('sortBy') || '-createdAt';
+    const postSlug = searchParams.get('slug') || '';
 
     const query: any = {};
 
@@ -34,13 +35,24 @@ export async function GET(req: NextRequest) {
       ];
     }
 
-    // Filter by category
-    if (category) {
-      query.category = category;
+    // Filter by post slug
+    if (postSlug) {
+      query.slug = postSlug;
+    }
+
+    // Filter by category slug (resolve to _id)
+    if (categorySlug) {
+      const categoryDoc = await Category.findOne({ slug: categorySlug });
+      if (categoryDoc) {
+        query.category = categoryDoc._id;
+      } else {
+        // If category not found, return empty result
+        return NextResponse.json({ success: true, data: [], pagination: { total: 0, page, limit, pages: 0 } });
+      }
     }
 
     // Filter by tags
-    if (tags.length > 0) {
+    if (tags.length > 0 && tags[0] !== '') {
       query.tags = { $in: tags };
     }
 
