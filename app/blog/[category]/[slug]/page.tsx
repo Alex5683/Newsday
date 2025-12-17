@@ -84,40 +84,44 @@ export default function BlogPostPage() {
   return (
     <>
       <Header />
-      <main className="max-w-3xl mx-auto py-8 px-4">
-        <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
-        <div className="flex items-center gap-4 text-xs text-gray-500 mb-6">
-          <span><User className="inline w-4 h-4 mr-1" />{post.author?.name}</span>
-          <span><Calendar className="inline w-4 h-4 mr-1" />{formatDate(post.createdAt)}</span>
-          <span><FolderOpen className="inline w-4 h-4 mr-1" />{post.category?.name}</span>
-          <span><Eye className="inline w-4 h-4 mr-1" />{post.views} views</span>
-        </div>
-        {post.coverImage && (
-          <img src={post.coverImage} alt={post.title} className="w-full rounded mb-6" />
-        )}
-        <div className="prose max-w-none mb-8" dangerouslySetInnerHTML={{ __html: post.content }} />
-        {post.tags.length > 0 && (
-          <div className="mb-8">
-            <h4 className="font-semibold mb-2">Tags:</h4>
-            <div className="flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <Link key={tag._id} href={`/blog/tag/${tag.slug}`} className="text-xs bg-blue-100 px-2 py-1 rounded text-blue-700">#{tag.name}</Link>
-              ))}
+      <main className="min-h-screen bg-gray-50 py-10 px-2 flex justify-center items-start">
+        <article className="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+          <h1 className="text-4xl font-bold mb-6 leading-tight font-sans">{post.title}</h1>
+          <div className="flex items-center gap-4 text-xs text-gray-500 mb-6">
+            <span><User className="inline w-4 h-4 mr-1" />{post.author?.name}</span>
+            <span><Calendar className="inline w-4 h-4 mr-1" />{formatDate(post.createdAt)}</span>
+            <Link href={`/blog/category/${post.category?.slug}`} className="inline-flex items-center hover:underline text-gray-700 font-medium">
+              <FolderOpen className="inline w-4 h-4 mr-1" />{post.category?.name}
+            </Link>
+            <span><Eye className="inline w-4 h-4 mr-1" />{post.views} views</span>
+          </div>
+          {post.coverImage && (
+            <img src={post.coverImage} alt={post.title} className="w-full rounded-lg mb-8 border" />
+          )}
+          <div className="blog-content max-w-none mb-8 font-sans text-gray-900 text-lg" dangerouslySetInnerHTML={{ __html: post.content }} />
+          {post.tags.length > 0 && (
+            <div className="mb-8">
+              <h4 className="font-semibold mb-2">Tags:</h4>
+              <div className="flex flex-wrap gap-2">
+                {post.tags.map((tag) => (
+                  <Link key={tag._id} href={`/blog/tag/${tag.slug}`} className="text-xs bg-blue-100 px-2 py-1 rounded text-blue-700">#{tag.name}</Link>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-        {relatedPosts.length > 0 && (
-          <div className="mt-12">
-            <h3 className="text-lg font-semibold mb-4">Related Posts</h3>
-            <ul className="space-y-2">
-              {relatedPosts.map((rp) => (
-                <li key={rp._id}>
-                  <Link href={`/blog/${category}/${rp.slug}`} className="text-blue-700 hover:underline font-medium">{rp.title}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+          )}
+          {relatedPosts.length > 0 && (
+            <div className="mt-12">
+              <h3 className="text-lg font-semibold mb-4">Related Posts</h3>
+              <ul className="space-y-2">
+                {relatedPosts.map((rp) => (
+                  <li key={rp._id}>
+                    <Link href={`/blog/${category}/${rp.slug}`} className="text-blue-700 hover:underline font-medium">{rp.title}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </article>
       </main>
       <Footer />
     </>

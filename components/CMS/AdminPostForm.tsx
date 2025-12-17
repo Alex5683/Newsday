@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
+import { Editor as TinyMCEEditor } from '@tinymce/tinymce-react';
+
 interface CategoryOption {
   _id: string;
   name: string;
@@ -35,6 +37,38 @@ export default function AdminPostForm({ initialPost, postId }: AdminPostFormProp
   const [excerpt, setExcerpt] = useState(initialPost?.excerpt || '');
   const [content, setContent] = useState(initialPost?.content || '');
   const [trending, setTrending] = useState(initialPost?.trending || false);
+  const [coverImage, setCoverImage] = useState(initialPost?.coverImage || '');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Cloudinary upload handler
+  const CLOUDINARY_UPLOAD_URL = process.env.NEXT_PUBLIC_CLOUDINARY_URL || 'https://api.cloudinary.com/v1_1/drwlimidd/image/upload';
+  const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'backlinkfusion';
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    try {
+      const res = await fetch(CLOUDINARY_UPLOAD_URL, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.secure_url) {
+        setCoverImage(data.secure_url);
+      } else {
+        alert('Image upload failed');
+      }
+    } catch (err) {
+      alert('Image upload error');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   // data fetching
   const [categories, setCategories] = useState<CategoryOption[]>([]);
@@ -106,13 +140,7 @@ export default function AdminPostForm({ initialPost, postId }: AdminPostFormProp
   }, [title, slugEdited]);
 
   // Auto-expand textarea as content grows
-  useEffect(() => {
-    const textarea = contentRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = textarea.scrollHeight + 'px';
-    }
-  }, [content]);
+  // Remove textarea auto-expand effect (not needed for Tiptap)
 
   async function saveDraft(overrides?: { status?: 'draft' | 'published' }) {
     // Validate required fields
@@ -140,6 +168,7 @@ export default function AdminPostForm({ initialPost, postId }: AdminPostFormProp
       excerpt: excerpt.trim() || undefined,
       content: content.trim(),
       trending,
+      coverImage: coverImage || undefined,
     };
 
     const payloadStr = JSON.stringify(toSave);
@@ -393,6 +422,32 @@ export default function AdminPostForm({ initialPost, postId }: AdminPostFormProp
               </label>
             </div>
 
+            {/* Feature Image (Cloudinary) */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">Feature Image</label>
+              {coverImage && (
+                <div className="mb-2">
+                  <img src={coverImage} alt="Feature" className="rounded-lg max-h-40 border" />
+                </div>
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                disabled={uploadingImage}
+              />
+              {uploadingImage && <div className="text-xs text-indigo-600 mt-1">Uploading...</div>}
+              {coverImage && (
+                <button
+                  type="button"
+                  className="mt-2 text-xs text-red-600 underline"
+                  onClick={() => setCoverImage('')}
+                >Remove Image</button>
+              )}
+            </div>
+
             {/* Excerpt */}
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">Excerpt</label>
@@ -511,44 +566,35 @@ export default function AdminPostForm({ initialPost, postId }: AdminPostFormProp
             {/* Content Editor */}
             <div className="flex-1 flex flex-col">
               <div className="mb-4">
-                <p className="text-sm text-gray-500 font-medium">📝 Markdown supported</p>
+                <p className="text-sm text-gray-500 font-medium">📝 Google Docs–like rich text editor (TinyMCE)</p>
               </div>
-              <textarea
-                ref={contentRef}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Start writing your post... (Markdown supported)"
-                className="w-full min-h-96 resize-none border border-gray-200 rounded-lg p-6 text-base leading-relaxed bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-                style={{ height: 'auto', overflowY: 'visible' }}
-              />
-
-              {/* Content Toolbar */}
-              <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <button
-                    onClick={handleInsertH2}
-                    className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-white hover:border-indigo-500 transition"
-                    title="Insert H2 heading"
-                  >
-                    <span className="text-lg">H2</span>
-                  </button>
-                  <button
-                    onClick={handleClearContent}
-                    className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-sm font-medium text-gray-700 rounded-lg hover:bg-white hover:border-red-500 transition"
-                    title="Clear all content"
-                  >
-                    🗑️ Clear
-                  </button>
-                </div>
-
-                <div className="text-sm font-medium text-gray-600">
-                  <span className="text-indigo-600 font-semibold">{content.length}</span> characters
-                  {content.length > 0 && (
-                    <span className="text-gray-400 ml-2">
-                      · {Math.ceil(content.length / 5)} words (approx)
-                    </span>
-                  )}
-                </div>
+              <div className="w-full min-h-96 border border-gray-200 rounded-lg p-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
+                <TinyMCEEditor
+                  apiKey="cqjhaf886qrh4n1is5ihif9u3fv1yr9c17bme0ojdbvb3chw"
+                  value={content}
+                  onEditorChange={(newValue) => setContent(newValue)}
+                  init={{
+                    height: 400,
+                    menubar: true,
+                    plugins: [
+                      'advlist autolink lists link image charmap print preview anchor',
+                      'searchreplace visualblocks code fullscreen',
+                      'insertdatetime media table paste code help wordcount',
+                    ],
+                    toolbar:
+                      'undo redo | formatselect | bold italic backcolor | \
+                      alignleft aligncenter alignright alignjustify | \
+                      bullist numlist outdent indent | removeformat | help',
+                  }}
+                />
+              </div>
+              <div className="mt-6 text-sm font-medium text-gray-600">
+                <span className="text-indigo-600 font-semibold">{content.length}</span> characters
+                {content.length > 0 && (
+                  <span className="text-gray-400 ml-2">
+                    · {Math.ceil(content.length / 5)} words (approx)
+                  </span>
+                )}
               </div>
             </div>
           </div>

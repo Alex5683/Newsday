@@ -1,3 +1,55 @@
+.blog-content {
+  font-family: 'Segoe UI', 'Inter', 'Helvetica Neue', Arial, 'sans-serif';
+  font-size: 1.125rem;
+  color: #222;
+}
+/* Blog Content Styling */
+.blog-content h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 2rem 0 1rem 0;
+}
+.blog-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.5rem 0 1rem 0;
+}
+.blog-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem 0;
+}
+.blog-content h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem 0;
+}
+.blog-content p {
+  margin: 0.75rem 0;
+  line-height: 1.7;
+}
+.blog-content ul, .blog-content ol {
+  margin: 1rem 0 1rem 2rem;
+  padding-left: 1.5rem;
+}
+.blog-content li {
+  margin-bottom: 0.5rem;
+}
+.blog-content strong {
+  font-weight: bold;
+}
+.blog-content em {
+  font-style: italic;
+}
+.blog-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+.blog-content img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
 @import "tailwindcss";
 
 :root {
