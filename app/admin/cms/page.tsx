@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FileText, Tag, FolderOpen, Users, BarChart3 } from 'lucide-react';
+import { FileText, Tag, FolderOpen, Users, BarChart3, Newspaper } from 'lucide-react';
 
 interface DashboardStats {
   totalPosts: number;
@@ -164,6 +164,13 @@ export default function CmsDashboard() {
             >
               <Tag className="text-pink-600" />
               <span className="font-semibold">Manage Tags</span>
+            </Link>
+            <Link
+              href="/admin/cms/external-news"
+              className="flex items-center gap-3 p-4 rounded-lg border-2 border-orange-200 hover:border-orange-500 hover:bg-orange-50 transition"
+            >
+              <Newspaper className="text-orange-600" />
+              <span className="font-semibold">External News</span>
             </Link>
           </div>
         </div>
