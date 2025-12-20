@@ -57,10 +57,10 @@ const NewsCategoryGrid: React.FC = () => {
                     className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-full h-64 bg-gradient-to-br from-blue-400 to-blue-600" />
+                  <div className="w-full h-64 bg-linear-to-br from-blue-400 to-blue-600" />
                 )}
                 {/* Dark gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent" />
                 {/* Category icon at top-right */}
                 <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm rounded-full p-2">
                   {/* Placeholder for category icon - assuming crypto/bitcoin */}
@@ -109,7 +109,7 @@ const NewsCategoryGrid: React.FC = () => {
               {gridPosts.slice(0, 3).map((post, index) => (
                 <div key={post._id} className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow flex gap-4">
                   {/* Rank Badge */}
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <div className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                       #{index + 2}
                     </div>
@@ -143,7 +143,7 @@ const NewsCategoryGrid: React.FC = () => {
                           className="w-20 h-20 object-cover rounded-lg hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
-                        <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg" />
+                        <div className="w-20 h-20 bg-linear-to-br from-blue-400 to-blue-600 rounded-lg" />
                       )}
                     </Link>
                   </div>

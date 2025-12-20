@@ -6,7 +6,6 @@ import Footer from '../components/Footer';
 
 import { MarketOverview } from '../components/MarketOverview';
 import { TrendingStocks } from '../components/TrendingStocks';
-import MarketTable from '../components/MarketTable';
 import { PopularScreens } from '../components/popular-screens';
 import { NewsSection } from '../components/news-section';
 import HomeBodyLayout from '../components/HomeBodyLayout';
@@ -64,10 +63,7 @@ export default function Home() {
             <div className="mb-8">
               <NewsCategoryGrid />
             </div>
-            {/* Market Table */}
-            <div className="mb-8">
-              <MarketTable />
-            </div>
+
             {/* Most Undervalued Stocks */}
             <div className="mb-8">
               <MostUndervaluedStocks />
