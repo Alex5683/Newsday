@@ -5,10 +5,10 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/cms-utils-client';
 import { Pagination } from '@/components/CMS/CmsComponents';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, User } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-
+import CategorySidebar from '@/components/CategorySidebar';
 
 import { useParams } from 'next/navigation';
 
@@ -88,55 +88,88 @@ export default function CategoryBlogPage() {
           </p>
         </div>
 
-        {/* Posts Grid */}
+        {/* Two Column Layout */}
         {posts.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p>No posts found in this category</p>
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {posts.map((post) => (
-                <Link
-                  key={post._id}
-                  href={`/blog/${category.slug}/${post.slug}`}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
-                >
-                  <div className="aspect-video bg-gray-200 overflow-hidden">
-                    {post.coverImage ? (
-                      <img
-                        src={post.coverImage}
-                        alt={post.title}
-                        className="w-full h-full object-cover hover:scale-105 transition"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-linear-to-br from-blue-400 to-blue-600" />
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
-                      {post.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                      {post.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>{post.author.name}</span>
-                      <span>{formatDate(post.createdAt)}</span>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - News Posts List */}
+            <div className="lg:col-span-2 space-y-6">
+              {posts.map((post, index) => (
+                <React.Fragment key={post._id}>
+                  <Link
+                    href={`/blog/${category.slug}/${post.slug}`}
+                    className="block bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition group"
+                  >
+                    <div className="flex gap-4 p-6">
+                      {/* Thumbnail */}
+                      <div className="shrink-0 w-32 h-24 bg-gray-200 rounded-lg overflow-hidden">
+                        {post.coverImage ? (
+                          <img
+                            src={post.coverImage}
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-linear-to-br from-blue-400 to-blue-600" />
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition">
+                          {post.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                          {post.excerpt}
+                        </p>
+
+                        {/* Meta Info */}
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
+                              <User className="w-3 h-3" />
+                            </div>
+                            <span>{post.author.name}</span>
+                          </div>
+                          <span>{formatDate(post.createdAt)}</span>
+                          <span>5 min read</span>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+
+                  {/* Advertisement Placeholder */}
+                  {(index + 1) % 3 === 0 && index < posts.length - 1 && (
+                    <div className="bg-gray-100 rounded-xl p-8 text-center border-2 border-dashed border-gray-300">
+                      <span className="text-gray-500 font-medium">ADVERTISEMENT</span>
+                    </div>
+                  )}
+                </React.Fragment>
               ))}
+
+              {/* Load More Button */}
+              {pagination.pages > 1 && pagination.page < pagination.pages && (
+                <div className="text-center pt-8">
+                  <button
+                    onClick={() => handlePageChange(pagination.page + 1)}
+                    className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+                  >
+                    Load More Articles
+                  </button>
+                </div>
+              )}
             </div>
 
-            {pagination.pages > 1 && (
-              <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.pages}
-                onPageChange={handlePageChange}
-              />
-            )}
-          </>
+            {/* Right Column - Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-8">
+                <CategorySidebar categorySlug={slug} />
+              </div>
+            </div>
+          </div>
         )}
       </div>
         </div>
