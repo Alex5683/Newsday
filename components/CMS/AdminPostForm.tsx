@@ -23,6 +23,8 @@ interface AdminPostFormProps {
     category: { _id: string; name: string };
     tags: { _id: string; name: string }[];
     status: 'draft' | 'published';
+    trending?: boolean;
+    coverImage?: string;
   };
   postId?: string;
 }
@@ -415,7 +417,7 @@ export default function AdminPostForm({ initialPost, postId }: AdminPostFormProp
                 <input
                   type="checkbox"
                   checked={trending}
-                  onChange={() => setTrending((v) => !v)}
+                  onChange={() => setTrending((v: boolean) => !v)}
                   className="rounded border-gray-300 cursor-pointer"
                 />
                 <span className="text-sm text-gray-700">Trending Post</span>
@@ -570,7 +572,6 @@ export default function AdminPostForm({ initialPost, postId }: AdminPostFormProp
               </div>
               <div className="w-full min-h-96 border border-gray-200 rounded-lg p-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition">
                 <TinyMCEEditor
-                  apiKey="cqjhaf886qrh4n1is5ihif9u3fv1yr9c17bme0ojdbvb3chw"
                   value={content}
                   onEditorChange={(newValue) => setContent(newValue)}
                   init={{
@@ -585,6 +586,7 @@ export default function AdminPostForm({ initialPost, postId }: AdminPostFormProp
                       'undo redo | formatselect | bold italic backcolor | \
                       alignleft aligncenter alignright alignjustify | \
                       bullist numlist outdent indent | removeformat | help',
+                    tinymceScriptSrc: '/tinymce/tinymce.min.js',
                   }}
                 />
               </div>

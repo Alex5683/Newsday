@@ -18,6 +18,7 @@ import NewsGridSection from '../components/NewsGridSection';
 import LiveNewsSections from '../components/LiveNewsSections';
 
 import HomeTopNewsGrid from '../components/HomeTopNewsGrid';
+import NewsCategoryGrid from '../components/NewsCategoryGrid';
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -58,6 +59,10 @@ export default function Home() {
             {/* Markets Overview */}
             <div className="mb-8">
               <MarketOverview />
+            </div>
+            {/* News Category Grid */}
+            <div className="mb-8">
+              <NewsCategoryGrid />
             </div>
             {/* Market Table */}
             <div className="mb-8">

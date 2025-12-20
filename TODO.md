@@ -1,2 +1,4 @@
-=======
-- [x] Add bulk upload functionality for instruments and price bars
+- [x] Update trending posts fetch limit to 7 in HomeTopNewsGrid.tsx
+- [x] Modify left column layout to add 2-column grid below featured post for trendingPosts[1] and [2]
+- [x] Adjust moreTrending to slice(3,7)
+- [x] Test component rendering and responsiveness (TypeScript compilation successful)
